@@ -1,0 +1,1 @@
+# Schema for mapping Mongo Document structures to Python classes
