@@ -1,7 +1,7 @@
 # Scripters Auction Backend
 
 ### To get started:
-Clone the project and open a terminal session /CLI in the backend directory.
+Clone the project and open a terminal or CLI session in the backend directory.
 
 Install
 
