@@ -1,6 +1,8 @@
 from . import catalog
+from ..validations import validate_price
 from ...models import Auction, Item
 from flask import jsonify, request
+from datetime import datetime
 
 
 @catalog.route("/", methods=["GET"])
@@ -10,31 +12,30 @@ def hello_catalog():
 
 
 @catalog.route("/upload", methods=["POST"])
-# TODO add seller authorization check
+# TODO add seller user type authorization check
+@validate_price
 def upload_auction():
     print("Hello from upload_auction")
+    data = request.json
 
     try:
-        # get arguments from json
-        data = request.json
-
-        # TODO add more args validations
         # create item
         new_item = Item(
-            name = data["item_name"],
-            price = data["item_price"],
-            status = data["item_status"],
-            category = data["item_category"]
+            name = data["name"],
+            price = data["price"],
+            status = data["status"],
+            category = data["category"]
         )
         new_item.save()
 
-        #create auction
+        # create auction
         new_auction = Auction(
-            name = data["name"],
-            duration = data["duration"],
             item = new_item,
+            slug = data["slug"],
             type = data["type"],
-            seller = data["seller"]
+            duration = data["duration"],
+            seller = data["seller"],
+            date_added = datetime.now()
         )
         new_auction.save()
 
@@ -43,21 +44,27 @@ def upload_auction():
         return jsonify({"error": str(e)}), 400
 
 
-@catalog.route("/dutch-update", methods=["PUT"])
-# TODO add seller authorization check
-def update_dutch_auction():
+@catalog.route("/<slug>/dutch-update", methods=["PATCH"])
+# TODO add seller user type authorization check
+def update_dutch_auction(slug):
     print("Hello from update_dutch_auction")
 
     try:
         # get price from json
-        new_price = request.json["price"] # TODO add more args validations
-        auction_id = request.json["auction_id"]
+        new_price = request.json["price"]
+
+        if new_price < 0:
+            return jsonify({"error": "Price must be non-negative."}), 400
 
         # Retrieve auction from database
-        auction = Auction.objects(id=auction_id).first()
-        auction.price = new_price
-        auction.save()
+        auction = Auction.objects(slug=slug).first()
 
+        #verify that auction is a dutch auction
+        if auction.type == "dutch":
+            auction.price = new_price
+            auction.save()
+        else:
+            return jsonify({"error": "Auction must be of type dutch."}), 400
         return jsonify({"message": "Auction price updated"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 400

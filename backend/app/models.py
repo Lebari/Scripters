@@ -1,11 +1,12 @@
 # Schema for mapping Mongo Document structures to Python classes
-from mongoengine import Document, StringField, IntField, ListField, ReferenceField
+from mongoengine import Document, StringField, IntField, ListField, \
+    ReferenceField, DateTimeField, BooleanField
 
 
 class Item(Document):
     name = StringField(required=True)
     price = IntField(required=True)
-    status = StringField(required=True)
+    status = BooleanField(required=True)
     category = StringField(required=True)
 
 
@@ -17,18 +18,21 @@ class User(Document):
 
 
 class Seller(User):
-    sales = ListField() #TODO change when Sale class is created
+    sales = ListField(Sale) #TODO 1 create Sale class
     auctions = ListField(Auction) #TODO ensure this works
 
 
 class Auction(Document):
-    name = StringField(required=True)
-    duration = IntField(required=True)
     item = Item(required=True)
+    slug = StringField(required=True)
     type = StringField(required=True)
+    duration = IntField(required=True)
     seller = ReferenceField(Seller, required=True)
 
-    #TODO fix below by creating needed classes
+    date_added: DateTimeField()
+    date_updated: DateTimeField()
+
+    #TODO 2 fix below by creating needed classes
     event = Event()
     broker = Broker()
     bids = ListField(Bid)
