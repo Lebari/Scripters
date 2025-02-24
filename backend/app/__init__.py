@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
+
 # Blueprints
 
 
@@ -10,16 +11,7 @@ def create_app():
     CORS(app)
     app.config["CORS_HEADERS"] = "Content-Type"
 
-    # connect(host="<CONNECTION_STRING>/flask_example_db") # connect mongoengine to mongodb atlas
 
-    #set up mongodb with flask
-    # app.config['MONGODB_SETTINGS'] = {
-    #     'db': 'your_database',
-    #     'host': 'localhost',
-    #     'port': 27017
-    # }
-    # db = MongoEngine()
-    # db.init_app(app)
     from .src import src as main_blueprint
     from .tests import tests as tests_blueprint
 
