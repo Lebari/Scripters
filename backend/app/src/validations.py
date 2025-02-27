@@ -4,7 +4,7 @@ from flask import jsonify, request
 
 
 def validate_price(f):
-    # TODO complete the authorization check
+    # Validate attributes for creating a new auction
     def wrapper(*args, **kwargs):
         data = request.json
 
@@ -40,6 +40,37 @@ def validate_price(f):
             return jsonify({"message": "Slug must be unique"}), 400
         if (auction_type != "Dutch") or (auction_type != "Forward"):
             return jsonify({"message": "Type must be 'Dutch' or 'Forward'"}), 400
+        return f(*args, **kwargs)
+
+    wrapper.__name__ = f.__name__
+    return wrapper
+
+
+def validate_user(f):
+    # Validate attributes to create new user
+    def wrapper(*args, **kwargs):
+        data = request.json
+
+        fname = data["fname"]
+        lname = data["lname"]
+        username = data["username"]
+        password = data["password"]
+
+        # validate the data for a new user
+        #   fname should be a non-empty string
+        #   lname should be a non-empty string
+        #   username should be a non-empty string
+        #   password should be a non-empty string
+
+        if type(fname) is not str or str.isspace(fname):
+            return jsonify({"message": "First Name must be a non-empty string"}), 400
+        if type(lname) is not str or str.isspace(lname):
+            return jsonify({"message": "Last Name must be a non-empty string"}), 400
+        if type(username) is not str or str.isspace(username):
+            return jsonify({"message": "Username must be a non-empty string"}), 400
+        if type(password) is not str or str.isspace(password):
+            return jsonify({"message": "Password must be a non-empty string"}), 400
+
         return f(*args, **kwargs)
 
     wrapper.__name__ = f.__name__

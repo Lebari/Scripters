@@ -15,6 +15,11 @@ class User(Document):
     lname = StringField(required=True)
     username = StringField(required=True)
     password = StringField(required=True)
+    street = StringField(required=True)
+    streetno = IntField(required=True)
+    city = StringField(required=True)
+    country = StringField(required=True)
+    postal = StringField(required=True)
 
 
 class Seller(User):
