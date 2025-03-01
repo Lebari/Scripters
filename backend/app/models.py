@@ -42,6 +42,11 @@ class Sale(Event):
 class Broker(Document):
     subscriptions = ListField(StringField())
 
+class Buyer(User):
+    purchases = ListField(ReferenceField(Sale)) 
+    broker = ReferenceField('Broker', required=True)
+    cards = ListField(ReferenceField('Card'))
+
 
 class Seller(User):
     sales = ListField(ReferenceField(Sale)) 
