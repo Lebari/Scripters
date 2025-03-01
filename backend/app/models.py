@@ -61,7 +61,7 @@ class Auction(Document):
     auction_type = StringField(required=True)
     duration = IntField(required=True)
     seller = ReferenceField(Seller, required=True)
-
+    is_active = BooleanField(required=True)
     date_added = DateTimeField()
     date_updated = DateTimeField()
 
