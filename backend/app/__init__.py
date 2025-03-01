@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
+from backend.database import *
 # Blueprints
 
 
@@ -7,6 +8,10 @@ def create_app():
     # Configure Flask
     print("creating flask app")
     app = Flask(__name__)
+
+    print("initiazing database connection")
+    init_db()
+
     CORS(app)
     app.config["CORS_HEADERS"] = "Content-Type"
 

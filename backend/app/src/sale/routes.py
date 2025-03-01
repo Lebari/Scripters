@@ -6,3 +6,4 @@ from flask import jsonify
 def hello_sale():
     print("Hello from Sale")
     return jsonify({"message": "Hello from Sale"}), 201
+
