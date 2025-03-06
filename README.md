@@ -17,7 +17,7 @@ Clone the project and open a terminal or CLI session in the backend directory.
 
 Install
 
-- [python3.12](https://www.python.org/downloads/release/python-3120/)
+- [python3.13.2](https://www.python.org/downloads/release/python-3132/)
 - [venv](https://realpython.com/python-virtual-environments-a-primer/)
 
 Create a python virtual environment named "venv", and install packages based on `requirements.txt`
