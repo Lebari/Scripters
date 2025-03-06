@@ -8,12 +8,14 @@ from .auth import auth as auth_blueprint
 from .catalog import catalog as catalog_blueprint
 from .bidding import bidding as bidding_blueprint
 from .search import search as search_blueprint
+from .payment import payment_bp as payment_blueprint
 
-# register blueprints
+# Register blueprints
 src.register_blueprint(sale_blueprint)
 src.register_blueprint(auth_blueprint)
 src.register_blueprint(catalog_blueprint)
 src.register_blueprint(bidding_blueprint)
 src.register_blueprint(search_blueprint)
+src.register_blueprint(payment_blueprint)  # Fix
 
-from . import routes
+from . import routes  # Ensure routes exist
