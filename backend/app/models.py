@@ -1,6 +1,28 @@
 # Schema for mapping Mongo Document structures to Python classes
+from enum import StrEnum
+
 from mongoengine import Document, StringField, IntField, ListField, \
     ReferenceField, DateTimeField, BooleanField
+from flask_login import UserMixin
+from werkzeug.security import check_password_hash
+
+
+class AuctionType(StrEnum):
+    DUTCH = "Dutch",
+    FORWARD = "Forward"
+
+
+class EventType(StrEnum):
+    SALE = "Sale",
+    BID = "Bid"
+
+
+class Category(StrEnum):
+    # used to define categories for auction items. Might be redundant when frontend done.
+    NEW = "New",
+    SHOES = "Shoes",
+    APPAREL = "Apparel",
+    ACCESSORIES = "Accessories"
 
 
 class Item(Document):
@@ -13,7 +35,7 @@ class Item(Document):
         return self.name
 
     def get_id(self):
-        return {"id": str(self.id)}
+        return str(self.id)
 
     def get_desc(self):
         return {
@@ -24,22 +46,22 @@ class Item(Document):
             "category": self.category
         }
 
-    def json_formatted(self):
+    def to_json(self):
         print(f"serializing {self.__str__}")
         self.get_desc()
 
 
-class User(Document):
+class User(UserMixin, Document):
     fname = StringField(required=True)
     lname = StringField(required=True)
     username = StringField(required=True, unique=True)
     password = StringField(required=True)
-    is_seller = BooleanField()
-    streetno = IntField()
-    street = StringField()
-    city = StringField()
-    country = StringField()
-    postal = StringField()
+    is_seller = BooleanField(required=True)
+    streetno = IntField(required=True)
+    street = StringField(required=True)
+    city = StringField(required=True)
+    country = StringField(required=True)
+    postal = StringField(required=True)
     broker = ReferenceField('Broker')
     cards = ListField(ReferenceField('Card'))
     sales = ListField(ReferenceField('Sale'))
@@ -47,11 +69,11 @@ class User(Document):
     subscriptions = ListField(ReferenceField('Broker'))
     auctions = ListField(ReferenceField('Auction'))
 
+    def check_password(self, password_hash, password):
+        return check_password_hash(password_hash, password)
+
     def __str__(self):
         return self.username
-
-    def get_id(self):
-        return {"id": str(self.id)}
 
     def get_desc(self):
         return {
@@ -61,7 +83,7 @@ class User(Document):
             "username": self.username,
         }
 
-    def json_formatted(self):
+    def to_json(self):
         print(f"serializing {self.__str__}")
         model_json = self.to_mongo().to_dict()
 
@@ -89,13 +111,13 @@ class Event(Document):
         return f"{self.event_type} {self.time:'%B %d, %Y'}"
 
     def get_id(self):
-        return {"id": str(self.id)}
+        return str(self.id)
 
-    def json_formatted(self):
+    def to_json(self):
         print(f"serializing {self.__str__}")
         model_json = self.to_mongo().to_dict()
 
-        model_json["user"] = self.user.get_id()
+        model_json["user"] = str(self.user.id)
         model_json["auction"] = self.auction.get_id()
         model_json["id"] = str(model_json["_id"])
         del model_json["_id"]
@@ -104,11 +126,11 @@ class Event(Document):
 
 class Bid(Event):
     def get_id(self):
-        return {"id": str(self.id)}
+        return str(self.id)
 
-    def json_formatted(self):
+    def to_json(self):
         print(f"serializing {self.__str__}")
-        return super.json_formatted()
+        return super.to_json()
 
 
 class Sale(Event):
@@ -118,11 +140,11 @@ class Sale(Event):
         return self.auction.item.name + self.price
 
     def get_id(self):
-        return {"id": str(self.id)}
+        return str(self.id)
 
-    def json_formatted(self):
+    def to_json(self):
         print(f"serializing {self.__str__}")
-        model_json = super.json_formatted()
+        model_json = super.to_json()
         model_json["card"] = self.card.get_id() if self.card else None
         return model_json
 
@@ -131,9 +153,9 @@ class Broker(Document):
     subscriptions = ListField(StringField()) #TODO need to figure out how to model a map here
 
     def get_id(self):
-        return {"id": str(self.id)}
+        return str(self.id)
 
-    def json_formatted(self):
+    def to_json(self):
         model_json = self.to_mongo().to_dict()
         model_json["id"] = str(model_json["_id"])
         del model_json["_id"]
@@ -159,9 +181,9 @@ class Auction(Document):
         return self.item.name
 
     def get_id(self):
-        return {"id": str(self.id)}
+        return str(self.id)
 
-    def json_formatted(self):
+    def to_json(self):
 
         print(f"serializing {self.__str__}")
         model_json = self.to_mongo().to_dict()
@@ -187,9 +209,9 @@ class Card(Document):
         return self.name
 
     def get_id(self):
-        return {"id": str(self.id)}
+        return str(self.id)
 
-    def json_formatted(self):
+    def to_json(self):
         print(f"serializing {self.__str__}")
         model_json = self.to_mongo().to_dict()
         model_json["id"] = str(model_json["_id"])

@@ -1,8 +1,9 @@
 from . import catalog
-from ..validations import validate_new_auction, AuctionType
-from ...models import Auction, Item, User
+from ..validations import validate_new_auction, seller_required
+from ...models import Auction, Item, User, AuctionType
 from flask import jsonify, request
 from datetime import datetime
+from flask_login import current_user
 
 
 @catalog.route("/", methods=["GET"])
@@ -12,16 +13,19 @@ def get_all_auctions():
     auctions = Auction.objects()
     auctions_json = []
     for auction in auctions:
-        auctions_json.append(auction.json_formatted())
+        auctions_json.append(auction.to_json())
 
-    return jsonify({"auctions": auctions_json}), 201
+    return jsonify({"All Auctions": auctions_json}), 201
 
 
 @catalog.route("/<slug>", methods=["GET"])
 def get_auction(slug):
     print("Hello from get_auction!")
     # return auction with specified slug
-    auction = Auction.objects(slug=slug).first().json_formatted()
+    auction = Auction.objects(slug=slug).first().to_json()
+
+    if auction is None:
+        return jsonify({"error": "Invalid slug"}), 400
 
     return jsonify({"auction": auction}), 201
 
@@ -31,9 +35,9 @@ def get_auction(slug):
 @validate_new_auction
 def upload_auction():
     print("Hello from upload_auction")
-    data = request.json
 
     try:
+        data = request.json
         # create item
         new_item = Item(
             name = data["name"],
@@ -61,7 +65,7 @@ def upload_auction():
 
 
 @catalog.route("/<slug>/dutch-update", methods=["PATCH"])
-# TODO add seller user type authorization check
+@seller_required
 def update_dutch_auction(slug):
     print("Hello from update_dutch_auction")
 
@@ -74,14 +78,15 @@ def update_dutch_auction(slug):
         if new_price < 0:
             return jsonify({"error": "Price must be non-negative."}), 400
         if auction.auction_type != AuctionType.DUTCH:
-            # TODO was here making sure the dutch enum works
-            print(f"auction type {auction.auction_type}, vs {AuctionType.DUTCH}")
             return jsonify({"error": "Auction must be of type dutch."}), 400
-        if ~auction.is_active:
+        if not auction.is_active:
             return jsonify({"error": "Auction must be active to update."}), 400
+        if current_user.id != auction.seller.id:
+            return jsonify({"error": "User is not auction's seller."}), 400
 
-        auction.price = new_price
-        auction.save()
+        item = Item.objects(id=auction.item.id).first()
+        item.price = new_price
+        item.save()
 
         return jsonify({"message": "Auction price updated"}), 201
     except Exception as e:

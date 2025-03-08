@@ -1,13 +1,8 @@
 # Validate request arguments
-from enum import StrEnum
 
-from ..models import Auction
+from ..models import Auction, AuctionType
 from flask import jsonify, request
-
-
-class AuctionType(StrEnum):
-    DUTCH = "Dutch",
-    FORWARD = "Forward"
+from flask_login import current_user
 
 
 def validate_new_auction(f):
@@ -47,6 +42,17 @@ def validate_new_auction(f):
             return jsonify({"message": "Slug must be unique"}), 400
         if (auction_type != AuctionType.DUTCH) and (auction_type != AuctionType.FORWARD.value):
             return jsonify({"message": "Type must be 'Dutch' or 'Forward'"}), 400
+        return f(*args, **kwargs)
+
+    wrapper.__name__ = f.__name__
+    return wrapper
+
+
+def seller_required(f):
+    # ensure that logged-in user is a seller
+    def wrapper(*args, **kwargs):
+        if not current_user.is_seller:
+            return jsonify({"error": "User is not a seller"})
         return f(*args, **kwargs)
 
     wrapper.__name__ = f.__name__
