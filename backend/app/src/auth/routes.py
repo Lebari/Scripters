@@ -39,16 +39,19 @@ def signup():
         return jsonify({"error": str(e)}), 400
 
 
-@auth.route("/login", methods=["GET"])
+@auth.route("/login", methods=["POST"])
 def login():
     print("Hello from login")
-    data = request.json
+    print(f"request {request} .data {request.data}")
+    data = request.get_json()
 
     try:
+        print("Hello from login 2")
         username = data["username"]
         user = User.objects(username=username).first()
         password = check_password_hash(user.password, data["password"])
 
+        print("Hello from login 3")
         if user and password:
             login_user(user)
             return jsonify({"message": "Sign in successful"}), 201
@@ -56,7 +59,7 @@ def login():
         return jsonify({"error": str(e)}), 400
 
 
-@auth.route("/logout", methods=["GET"])
+@auth.route("/logout", methods=["POST"])
 def logout():
     print("Hello from logout")
     try:
