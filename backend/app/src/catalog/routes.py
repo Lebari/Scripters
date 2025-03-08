@@ -1,9 +1,9 @@
 from . import catalog
 from ..validations import validate_new_auction, seller_required
-from ...models import Auction, Item, User, AuctionType
+from ...models import Auction, Item, AuctionType
 from flask import jsonify, request
 from datetime import datetime
-from flask_login import current_user
+from flask_login import current_user, login_required
 
 
 @catalog.route("/", methods=["GET"])
@@ -31,7 +31,7 @@ def get_auction(slug):
 
 
 @catalog.route("/upload", methods=["POST"])
-# TODO add seller user type authorization check
+@login_required
 @validate_new_auction
 def upload_auction():
     print("Hello from upload_auction")
@@ -53,11 +53,25 @@ def upload_auction():
             slug = data["slug"],
             auction_type = data["auction_type"],
             duration = data["duration"],
-            seller = User.objects(id=data["seller"]).first(),
+            seller = current_user,
             is_active = True,
             date_added = datetime.now()
         )
         new_auction.save()
+
+        # ensure some user is logged in
+        if not current_user:
+            return jsonify({"error": "Please log in first"})
+
+        # if it is user's first auction, make them a seller
+        if len(current_user.auctions) == 0:
+            current_user.is_seller = True
+            current_user.save()
+            print("User is now a seller")
+
+        # add auction to seller's list of auctions
+        current_user.auctions.append(new_auction.id)
+        current_user.save()
 
         return jsonify({"message": "New auction uploaded"}), 201
     except Exception as e:
