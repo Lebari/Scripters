@@ -1,19 +1,10 @@
 from . import bidding
-from flask import jsonify, abort
+from flask import jsonify, abort, request
 from ...models import *
 from backend.database import *
+from datetime import datetime
 from flask_login import current_user, login_required
 
-
-@bidding.route('/dutch/<slug>', methods=['GET'])
-def show_auction(slug):
-    
-    auction = Auction.objects(slug=slug).first()
-    if not auction:
-        abort(404)
-
-    auction_data = auction.to_json()
-    return auction_data, 200
 
 @bidding.route('/dutch/<slug>', methods=['POST'])
 @login_required
@@ -26,7 +17,7 @@ def buyNow_Dutch(slug):
 
     # Mark the auction as inactive and update the timestamp
     auction.is_active = False
-    auction.date_updated = datetime.utcnow()
+    auction.date_updated = datetime.now()
     auction.save()
 
     # Get JSON payload and extract the price for sale
@@ -38,9 +29,9 @@ def buyNow_Dutch(slug):
     # Create a new Sale object.
     bid = Bid(
         user=current_user,           # logged in buyer
-        event_type="buy_now",              # type of event
-        time=datetime.utcnow(),
-        price=sale_price,    
+        event_type=EventType.SALE,   # type of event
+        time=datetime.now(),
+        price=sale_price,
         auction=auction,
     )
     bid.save()
@@ -49,7 +40,7 @@ def buyNow_Dutch(slug):
     auction.event = bid
     auction.save()
 
-    current_user.purchases.append(bid)
+    current_user.purchases.append(bid.id)
     current_user.save()
 
     return jsonify({"status": "success", "payment_url": "----"}), 200

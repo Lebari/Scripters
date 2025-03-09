@@ -1,7 +1,8 @@
 from flask import Flask
 from flask_cors import CORS
 from backend.database import *
-# Blueprints
+from flask_login import LoginManager
+from backend.app.models import User, Anonymous
 
 
 def create_app():
@@ -9,22 +10,21 @@ def create_app():
     print("creating flask app")
     app = Flask(__name__)
 
-    print("initiazing database connection")
-    init_db()
+    app.secret_key = SECRET_KEY
+
+    # Configure Flask login manager
+    login_manager = LoginManager()
+    login_manager.anonymous_user = Anonymous
+    login_manager.init_app(app)
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        print("lod user")
+        return User.objects(id=user_id).first()
 
     CORS(app)
     app.config["CORS_HEADERS"] = "Content-Type"
 
-    # connect(host="<CONNECTION_STRING>/flask_example_db") # connect mongoengine to mongodb atlas
-
-    #set up mongodb with flask
-    # app.config['MONGODB_SETTINGS'] = {
-    #     'db': 'your_database',
-    #     'host': 'localhost',
-    #     'port': 27017
-    # }
-    # db = MongoEngine()
-    # db.init_app(app)
     from .src import src as main_blueprint
     from .tests import tests as tests_blueprint
 
@@ -32,4 +32,5 @@ def create_app():
     app.register_blueprint(main_blueprint)
     app.register_blueprint(tests_blueprint)
 
+    init_db()
     return app
