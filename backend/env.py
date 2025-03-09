@@ -1,5 +1,5 @@
 USER = "admin"
 PASS = "admin"
-# SECRET_KEY = ""
+SECRET_KEY = "scripters"
 # CC_ENCRYPT_KEY = ""
 DB_URI = f"mongodb+srv://{USER}:{PASS}@cluster0.jpmef.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
