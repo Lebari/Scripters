@@ -11,59 +11,43 @@ def test_payment():
     """Test endpoint to check if the payment service is running"""
     return jsonify({"message": "Hi"}), 200
 
-@payment_bp.route("/", methods=["GET"])
-@login_required
-def get_payment_history():
-    """Retrieve the payment history of the logged-in user"""
-    try:
-        payments = Payment.objects(user=current_user.id)
-        payments_list = [payment.to_json() for payment in payments]
+import datetime
+import uuid
+from flask import Blueprint, request, jsonify
+from flask_login import login_required, current_user
 
-        return jsonify({"status": "success", "payments": payments_list}), 200
-    except Exception as e:
-        abort(500, description=str(e))
+payment_bp = Blueprint("payment", __name__)
 
-@payment_bp.route("/", methods=["POST"])
+@payment_bp.route("/payment", methods=["POST"])
 @login_required
 def process_payment():
-    """Mock payment processing for an auction item"""
-    data = request.get_json()
-    print(data)
-
-    if not data or "auction_id" not in data:
-        return jsonify({"error": "Missing 'auction_id' in JSON payload."}), 400
-
-    auction_id = data["auction_id"]
+    """Process payment for an auction item"""
+    print(f"Processing payment for user: {current_user.username}")
 
     try:
+        data = request.get_json()
+        required_fields = ["auction_id", "card_number", "card_name", "exp_date", "security_code"]
+        if not all(field in data for field in required_fields):
+            return jsonify({"error": "Missing required payment details"}), 400
+
+        auction_id = data["auction_id"]
         auction = Auction.objects(id=auction_id).first()
+
         if not auction:
             return jsonify({"error": "Auction not found"}), 404
+        
+        if auction.is_active:
+            print(f"Auction {auction_id} is still active")
+            return jsonify({"error": "Auction is still active, cannot process payment"}), 403
+        
+        print("Auction is inactive, retrieving highest bid...")
 
-        if auction.winner.id != current_user.id:
-            return jsonify({"error": "You are not the winner of this auction"}), 403
-
-        total_amount = auction.final_price + auction.shipping_cost
-
-        payment_id = str(uuid.uuid4())
-        mock_payment = Payment(
-            user=current_user.id,
-            auction=auction.id,
-            amount=total_amount,
-            status="Success",
-            payment_id=payment_id,
-            timestamp=datetime.datetime.utcnow()
-        )
-        mock_payment.save()
-
-        auction.payment_status = "Paid"
-        auction.save()
+        bid_events = Event.objects(id__in=auction.bids) 
 
         return jsonify({
-            "status": "success",
-            "message": "Mock payment successful",
-            "payment_id": payment_id
-        }), 200
+            "message": "Auction is inactive. Proceeding with payment...",
+        })
 
     except Exception as e:
-        abort(500, description=str(e))
+        print(f"Payment processing error: {str(e)}")
+        return jsonify({"error": str(e)}), 400
