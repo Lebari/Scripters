@@ -2,7 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from backend.database import *
 from flask_login import LoginManager
-from backend.app.models import User
+from backend.app.models import User, Anonymous
 
 
 def create_app():
@@ -14,10 +14,12 @@ def create_app():
 
     # Configure Flask login manager
     login_manager = LoginManager()
+    login_manager.anonymous_user = Anonymous
     login_manager.init_app(app)
 
     @login_manager.user_loader
     def load_user(user_id):
+        print("lod user")
         return User.objects(id=user_id).first()
 
     CORS(app)

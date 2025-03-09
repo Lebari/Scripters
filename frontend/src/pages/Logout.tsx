@@ -1,9 +1,9 @@
 import axios from "axios";
 import {useState} from "react"
 
-const Login = () => {
-    const [loginForm, setLoginForm] = useState({uname: "", pw: ""});
-    const [failedLogin, setFailedLogin] = useState(false);
+const Logout = () => {
+    const [loginForm, setLogoutForm] = useState({uname: "", pw: ""});
+    const [failedLogout, setFailedLogout] = useState(false);
     const loginU = (event: React.FormEvent) =>{
         console.log(`user ${loginForm.uname} pw ${loginForm.pw}`)
         axios({
@@ -16,10 +16,10 @@ const Login = () => {
             }
         }).then((result) => {
             console.log(result.data);
-            // window.location.href = import.meta.env.VITE_APP_CATALOG_URL
-            setFailedLogin(false);
+            window.location.href = import.meta.env.VITE_APP_CATALOG_URL
+            setFailedLogout(false);
         }).catch((error) => {
-            setFailedLogin(true);
+            setFailedLogout(true);
             if (error.response) {
                 console.log(error.response);
                 console.log(error.response.status);
@@ -27,7 +27,7 @@ const Login = () => {
             }
         });
 
-        setLoginForm(({
+        setLogoutForm(({
             uname: "",
             pw: ""
         }));
@@ -52,7 +52,7 @@ const Login = () => {
     const updateForm = (event: React.ChangeEvent<HTMLInputElement>) => {
         // handle updating the loginForm state whenever a field changes
         const {value, name} = event.target
-        setLoginForm(prevNote => ({
+        setLogoutForm(prevNote => ({
                 ...prevNote, [name]: value
             })
         )
@@ -71,7 +71,7 @@ const Login = () => {
                     <input type={"submit"} name={"submit"} onClick={loginU}/>
                 </div>
             </form>
-        {failedLogin?
+        {failedLogout?
             <p className={"text-red-400"}>Please check credentials and try again.</p>
             : <></>
         }
@@ -86,4 +86,4 @@ const Login = () => {
         </div>
     )
 }
-export default Login;
+export default Logout;

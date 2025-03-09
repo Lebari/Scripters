@@ -43,17 +43,16 @@ def signup():
 def login():
     print("Hello from login")
     print(f"request {request} .data {request.data}")
-    data = request.get_json()
+    data = request.json
 
     try:
-        print("Hello from login 2")
         username = data["username"]
         user = User.objects(username=username).first()
         password = check_password_hash(user.password, data["password"])
 
-        print("Hello from login 3")
         if user and password:
             login_user(user)
+            # TODO replace flask-login with token session mgt
             return jsonify({"message": "Sign in successful"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 400
