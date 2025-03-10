@@ -219,7 +219,6 @@ class Card(Document):
     cvv = IntField(required=True)
     expiry = DateTimeField(required=True)
 
- auction_upload_update
     def __str__(self):
         return self.name
 
@@ -250,8 +249,7 @@ class Payment(Document):
             "status": self.status,
             "payment_id": self.payment_id,
             "timestamp": self.timestamp.isoformat() if self.timestamp else None
-        }    
- Payment
+        }
 
 
 
