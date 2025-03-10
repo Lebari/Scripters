@@ -41,23 +41,20 @@ def process_payment():
 
         if not event_object:
             return jsonify({"error": "Winning bid event not found"}), 404
-
-        if str(event_object.user.id) != str(current_user.id):
+        
+        if str(event_object.user.id) == str(current_user.id):
             return jsonify({"error": "You are not the owner who won this bid"}), 403
-        unique_payment_id = str(uuid.uuid4())
 
         payment = Payment(
             user=current_user,
             auction=auction,
             amount=event_object.price, 
             status="Success",
-            payment_id=unique_payment_id,
             timestamp=datetime.utcnow(),
             shipping_address=shipping_address
         )
 
         payment.save()
-        print(f"Payment saved with ID: {payment.id} and payment_id: {payment.payment_id}")
 
         current_user.update(push__purchases=payment.id)
         current_user.reload()

@@ -236,7 +236,6 @@ class Payment(Document):
     auction = ReferenceField(Auction, required=True)
     amount = IntField(required=True)
     status = StringField(required=True, choices=["Pending", "Success", "Failed"])
-    payment_id = StringField(required=True, unique=True)
     timestamp = DateTimeField(required=True)
     shipping_address = StringField(required=True)  # ✅ New field for shipping address
 
@@ -247,7 +246,6 @@ class Payment(Document):
             "auction_id": str(self.auction.id) if self.auction else None,
             "amount": self.amount,
             "status": self.status,
-            "payment_id": self.payment_id,
             "timestamp": self.timestamp.isoformat() if self.timestamp else None,
             "shipping_address": self.shipping_address  # ✅ Include in JSON output
         }
