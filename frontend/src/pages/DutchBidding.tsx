@@ -1,63 +1,62 @@
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
+import "./bidding.css";
 
 function DutchBidding() {
   const location = useLocation();
   const auction = location.state?.auction;
-  const [price, setPrice] = useState("");
+  
   const [error, setError] = useState("");
-  const [paymentUrl, setPaymentUrl] = useState("");
+  const [message, setMessage] = useState("");
 
   if (!auction) {
-    return <div>No auction selected.</div>;
+    return (
+      <div className="bidding-container">
+        <p className="bidding-error">No auction selected.</p>
+      </div>
+    );
   }
 
   const handleBuyNow = (e: React.FormEvent) => {
     e.preventDefault();
-    // Call backend endpoint for Dutch bidding using auction.slug
+
+    // POST to your Dutch auction endpoint without any price input
     axios
-      .post(`http://localhost:5000/bidding/dutch/${auction.slug}`, { price })
+      .post(`http://localhost:5000/bidding/dutch/${auction.slug}`, { price: auction.currentBid })
       .then((response) => {
         if (response.data.status === "success") {
-          setPaymentUrl(response.data.payment_url);
+          setMessage("Purchase successful!");
+          setError("");
         } else {
           setError("Failed to process purchase.");
+          setMessage("");
         }
       })
       .catch((err) => {
         setError("Error: " + err.message);
+        setMessage("");
       });
   };
 
   return (
-    <div style={{ maxWidth: "600px", margin: "2rem auto" }}>
-      <h2>Dutch Auction Purchase</h2>
-      <p>
-        <strong>Item:</strong> {auction.name}
-      </p>
-      <p>
-        <strong>Current Bid:</strong> {auction.currentBid}
-      </p>
-      <form onSubmit={handleBuyNow}>
-        <label htmlFor="price">Your Price:</label>
-        <input
-          id="price"
-          type="number"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          style={{ marginLeft: "1rem" }}
-        />
-        <button type="submit" style={{ marginLeft: "1rem" }}>
-          Buy Now
-        </button>
-      </form>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {paymentUrl && (
-        <p>
-          Payment URL: <a href={paymentUrl}>{paymentUrl}</a>
+    <div className="bidding-container">
+      <h2 className="bidding-heading">Dutch Auction Purchase</h2>
+      <div className="bidding-card">
+        <h3 className="bidding-item-name">{auction.name}</h3>
+        <p className="bidding-current-bid">
+          <strong>Current Price:</strong> {auction.currentBid || 0}
         </p>
-      )}
+
+        <form onSubmit={handleBuyNow} className="bidding-form">
+          <button type="submit" className="bidding-button">
+            Buy Now
+          </button>
+        </form>
+
+        {error && <p className="bidding-error">{error}</p>}
+        {message && <p className="bidding-success">{message}</p>}
+      </div>
     </div>
   );
 }
