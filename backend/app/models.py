@@ -218,7 +218,7 @@ class Card(Document):
     number = IntField(required=True, unique=True)
     cvv = IntField(required=True)
     expiry = DateTimeField(required=True)
-
+    
     def __str__(self):
         return self.name
 
@@ -237,8 +237,8 @@ class Payment(Document):
     auction = ReferenceField(Auction, required=True)
     amount = IntField(required=True)
     status = StringField(required=True, choices=["Pending", "Success", "Failed"])
-    payment_id = StringField(required=True, unique=True)
     timestamp = DateTimeField(required=True)
+    shipping_address = StringField(required=True)
 
     def to_json(self):
         return {
@@ -247,8 +247,8 @@ class Payment(Document):
             "auction_id": str(self.auction.id) if self.auction else None,
             "amount": self.amount,
             "status": self.status,
-            "payment_id": self.payment_id,
-            "timestamp": self.timestamp.isoformat() if self.timestamp else None
+            "timestamp": self.timestamp.isoformat() if self.timestamp else None,
+            "shipping_address": self.shipping_address
         }
 
 
