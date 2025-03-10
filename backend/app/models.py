@@ -219,7 +219,6 @@ class Card(Document):
     cvv = IntField(required=True)
     expiry = DateTimeField(required=True)
 
- auction_upload_update
     def __str__(self):
         return self.name
 
@@ -232,7 +231,8 @@ class Card(Document):
         model_json["id"] = str(model_json["_id"])
         del model_json["_id"]
         return model_json
-    
+
+
 class Payment(Document):
     user = ReferenceField(User, required=True)
     auction = ReferenceField(Auction, required=True)
@@ -250,10 +250,4 @@ class Payment(Document):
             "status": self.status,
             "payment_id": self.payment_id,
             "timestamp": self.timestamp.isoformat() if self.timestamp else None
-        }    
- Payment
-
-
-
-
-
+        }

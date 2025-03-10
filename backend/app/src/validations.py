@@ -1,8 +1,11 @@
 # Validate request arguments
 
 from ..models import Auction, AuctionType
-from flask import jsonify, request
-from flask_login import current_user
+
+import jwt
+from ..models import User
+from flask import request, jsonify
+from flask_jwt_extended import create_access_token, decode_token
 
 
 def validate_new_auction(f):
@@ -48,17 +51,6 @@ def validate_new_auction(f):
     return wrapper
 
 
-def seller_required(f):
-    # ensure that logged-in user is a seller
-    def wrapper(*args, **kwargs):
-        if not current_user.is_seller:
-            return jsonify({"error": "User is not a seller"})
-        return f(*args, **kwargs)
-
-    wrapper.__name__ = f.__name__
-    return wrapper
-
-
 def validate_user(f):
     # Validate attributes to create new user
     def wrapper(*args, **kwargs):
@@ -88,3 +80,71 @@ def validate_user(f):
 
     wrapper.__name__ = f.__name__
     return wrapper
+
+
+# Token generation and retrieval
+def generate_token(username):
+    uname_object = {"username": username}
+    token = create_access_token(identity=uname_object)
+    return token
+
+
+def seller_required(f):
+    def wrapper(*args, **kwargs):
+        print("CHECKING IF SELLER")
+        token = request.headers.get("Authorization")
+        if not token:
+            return jsonify({"message": "Token is missing!"}), 403
+
+        try:
+            # Get user from token and check if user exists
+            print(token)
+            user = get_user_from_token(token)
+            if not user.is_seller:
+                return jsonify({"message": "User is not a seller."}), 403
+
+        except jwt.ExpiredSignatureError:
+            return jsonify({"message": "Token has expired."}), 403
+        except jwt.InvalidTokenError:
+            return jsonify({"message": "Invalid token."}), 403
+
+        return f(*args, **kwargs)
+
+    wrapper.__name__ = f.__name__
+    return wrapper
+
+
+def login_required(f):
+    def wrapper(*args, **kwargs):
+        token = request.headers.get("Authorization")
+        if not token:
+            return jsonify({"message": "Token is missing."}), 403
+
+        try:
+            # Get user from token and check if user exists
+            print(token)
+            user = get_user_from_token(token)
+            if user is None:
+                return jsonify({"message": "Invalid user token, user not found"}), 400
+
+        except jwt.ExpiredSignatureError:
+            return jsonify({"message": "Token has expired."}), 403
+        except jwt.InvalidTokenError:
+            return jsonify({"message": "Invalid token."}), 403
+
+        return f(*args, **kwargs)
+
+    wrapper.__name__ = f.__name__
+    return wrapper
+
+
+def get_user_from_token(token):
+    # return user from token, or from request data
+    print(f"token: {token}")
+    username = decode_token(token.split(" ")[1])
+    user = User.objects(username=username).first()
+
+    if user is None:
+        data = request.json
+        return User.objects(username=data.get("username")).first()
+    return user

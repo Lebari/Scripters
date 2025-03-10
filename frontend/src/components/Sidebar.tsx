@@ -26,16 +26,16 @@ const Sidebar: React.FC = memo(() => {
     const liStyle = "flex w-full text-left";
 
     return (
-        <aside className="w-[240px] h-auto grid grid-cols-1 pl-8 pr-8 place-items-start" aria-label="Sidebar">
+        <aside className="w-[240px] bg-white h-auto grid grid-cols-1 pl-8 pr-8 place-items-start" aria-label="Sidebar">
             <p className={"mb-2"}>Menu</p>
             {/* Page Links */}
             <ul>
                 {sidebarItems.map((link) => (
                     <li
                         key={link.name}
-                        className={`mb-2 hover:text-white hover:font-medium hover:border`}>
+                        className={`mb-2 hover:text-white hover:font-medium hover:border list-none p-0 m-0`}>
                         <NavLink to={link.href} className={({ isActive}) =>
-                            isActive ? `${liStyle} text-white`
+                            isActive ? `${liStyle}`
                                 : `${liStyle}`}>
                             {link.name}
                         </NavLink>

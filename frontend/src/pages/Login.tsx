@@ -1,7 +1,10 @@
 import axios from "axios";
-import {useState} from "react"
+import React, {useState} from "react"
+import {useTokenContext} from "../components/TokenContext.tsx";
 
 const Login = () => {
+    const {user, setUser, setToken} = useTokenContext();
+
     const [loginForm, setLoginForm] = useState({uname: "", pw: ""});
     const [failedLogin, setFailedLogin] = useState(false);
     const loginU = (event: React.FormEvent) =>{
@@ -16,8 +19,12 @@ const Login = () => {
             }
         }).then((result) => {
             console.log(result.data);
-            // window.location.href = import.meta.env.VITE_APP_CATALOG_URL
+            setToken(result.data.token);
             setFailedLogin(false);
+            getUser(); //update the user for the application
+            // setTimeout(() => {
+            //     window.location.href = import.meta.env.VITE_APP_CATALOG_URL; // Redirect to catalog
+            // }, 3000);
         }).catch((error) => {
             setFailedLogin(true);
             if (error.response) {
@@ -34,13 +41,15 @@ const Login = () => {
 
         event.preventDefault();
     }
-    const logoutU = () =>{
+    const getUser = ()=>{
+        console.log(`user retrieved? ${user.username}`)
         axios({
             baseURL: "http://localhost:5000",
-            url: "logout",
-            method: "post"
+            url: "user",
+            method: "get"
         }).then((result) => {
-            console.log(result);
+            console.log(result.data);
+            setUser(result.data.user);
         }).catch((error) => {
             if (error.response) {
                 console.log(error.response);
@@ -48,6 +57,10 @@ const Login = () => {
                 console.log(error.response.headers);
             }
         });
+    }
+
+    const logoutU = () =>{
+        window.location.href = import.meta.env.VITE_APP_LOGOUT_URL
     }
     const updateForm = (event: React.ChangeEvent<HTMLInputElement>) => {
         // handle updating the loginForm state whenever a field changes

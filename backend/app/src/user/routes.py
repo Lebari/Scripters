@@ -2,11 +2,11 @@ from . import user
 from ...models import User
 
 from flask import jsonify
-from flask_login import login_required, current_user
+from flask_jwt_extended import current_user, jwt_required
 
 
 @user.route("/user", methods=["GET"])
-@login_required
+@jwt_required()
 def get_user():
     print("Hello from get_user")
     try:
