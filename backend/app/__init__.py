@@ -19,7 +19,7 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(user_id):
-        print("lod user")
+        print("load user")
         return User.objects(id=user_id).first()
 
     CORS(app)

@@ -69,4 +69,44 @@ def process_payment():
         print(f"Payment processing error: {str(e)}")
         return jsonify({"error": str(e)}), 400
 
+@payment_bp.route("/receipt", methods=["POST"])
+@login_required
+def generate_receipt():
+    """Generate a receipt for a completed payment"""
+    try:
+        data = request.get_json()
+        if "purchase_id" not in data:
+            return jsonify({"error": "Missing purchase_id"}), 400
 
+        purchase_id = data["purchase_id"]
+        dbref_list = current_user.purchases
+        id_found = None
+        for ref in dbref_list:
+            if str(ref.id) == str(purchase_id):
+                id_found = str(ref.id)
+                break
+
+        if not id_found:
+            return jsonify({"error": "Purchase ID not found in user's purchases"}), 404
+        payment = Payment.objects(id=id_found).first()
+
+        if not payment:
+            return jsonify({"error": "Payment record not found"}), 404
+
+        receipt = {
+            "purchase_id": id_found,
+            "user_name": f"{current_user.fname} {current_user.lname}",
+            "auction_id": str(payment.auction.id),
+            "amount_paid": payment.amount,
+            "shipping_address": payment.shipping_address,
+            "delivery_estimate": f"{7} business days"
+        }
+
+        return jsonify({
+            "message": "Purchase Receipt",
+            "receipt": receipt
+        })
+
+    except Exception as e:
+        print(f"Receipt generation error: {str(e)}")
+        return jsonify({"error": str(e)}), 400
