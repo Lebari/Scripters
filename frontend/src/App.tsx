@@ -1,4 +1,3 @@
-import './App.css';
 import { Routes, Route } from "react-router-dom";
 import Login from "./pages/Login.tsx";
 import Catalog from "./pages/Catalog.tsx";
@@ -9,9 +8,9 @@ import AuctionSearchDisplay from "./pages/AuctionSearchDisplay.tsx"; // Updated 
 import ForwardBidding from "./pages/ForwardBidding.tsx";
 import DutchBidding from "./pages/DutchBidding.tsx";
 
-import { useEffect } from "react";
 import axios from "axios";
 
+import { useEffect } from "react";
 import {useTokenContext} from "./components/TokenContext.tsx";
 
 function App() {
@@ -19,14 +18,14 @@ function App() {
     const {user, setUser} = useTokenContext();
 
   const getUser = ()=>{
-      console.log(`user retrieved? ${user.username}`)
       axios({
           baseURL: "http://localhost:5000",
           url: "user",
           method: "get"
-      }).then((result) => {
+      }).then(async (result) => {
           console.log(result.data);
-          setUser(result.data);
+          setUser(result.data.user);
+          console.log(`user retrieved? ${user.username}`)
       }).catch((error) => {
           if (error.response) {
               console.log(error.response);
@@ -38,7 +37,7 @@ function App() {
     useEffect(() => {getUser();}, []);
 
   return (
-      <div className="min-h-screen flex gap-8 pt-8 pb-10">
+      <div className="min-h-screen flex flex-row gap-8 bg-black">
           {/* Sidebar */}
           <div className="border-r mb-10">
               <Sidebar/>
@@ -56,15 +55,15 @@ function App() {
 
                   {/* Combined Auction Search & Display Page */}
                   <Route
-                      path={import.meta.env.VITE_APP_SEARCH_URL || "/auction-search"}
+                      path={import.meta.env.VITE_APP_SEARCH_URL}
                       element={<AuctionSearchDisplay />}
                   />
 
                   {/* Forward Auction Bidding Page */}
-                  <Route path="/forward-bid" element={<ForwardBidding />} />
+                  <Route path={import.meta.env.VITE_APP_UC31FWDBIDDING_URL} element={<ForwardBidding />} />
 
                   {/* Dutch Auction Bidding Page */}
-                  <Route path="/dutch-bid" element={<DutchBidding />} />
+                  <Route path={import.meta.env.VITE_APP_UC31FWDBIDDING_URL} element={<DutchBidding />} />
               </Routes>
           </div>
       </div>

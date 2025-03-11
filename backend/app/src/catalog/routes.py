@@ -15,7 +15,7 @@ def get_all_auctions():
     for auction in auctions:
         auctions_json.append(auction.to_json())
 
-    return jsonify({"All Auctions": auctions_json}), 201
+    return jsonify({"auctions": auctions_json}), 201
 
 
 @catalog.route("/<slug>", methods=["GET"])

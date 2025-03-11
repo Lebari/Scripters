@@ -101,9 +101,9 @@ function AuctionSearchDisplay() {
     if (!selectedAuction) return;
 
     if (selectedAuction.auctionType === "Forward") {
-      navigate("/forward-bid", { state: { auction: selectedAuction } });
+      navigate(import.meta.env.VITE_APP_UC31FWDBIDDING_URL, { state: { auction: selectedAuction } });
     } else if (selectedAuction.auctionType === "Dutch") {
-      navigate("/dutch-bid", { state: { auction: selectedAuction } });
+      navigate(import.meta.env.VITE_APP_UC32DCHBIDDING_URL, { state: { auction: selectedAuction } });
     } else {
       console.log("Unknown auction type:", selectedAuction.auctionType);
     }

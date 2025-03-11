@@ -93,7 +93,7 @@ const SignUp = () => {
             <p className={"text-red-400"}>Please check credentials and try again.</p>
             : <></>
         }
-        <div className="card">
+        <div>
             <button onClick={() => window.location.href = import.meta.env.VITE_APP_LOGIN_URL }>
                 Go To Login
             </button>

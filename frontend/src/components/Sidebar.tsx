@@ -24,8 +24,8 @@ const Sidebar: React.FC = memo(() => {
     const liStyle = "flex w-full text-left";
 
     return (
-        <aside className="fixed top-0 left-0 w-[200px] h-screen bg-gray-100 overflow-y-auto pl-4 pr-4 pt-4 place-items-start" aria-label="Sidebar">
-            {/*h-auto grid grid-cols-1*/}
+        <aside className="w-[200px] h-auto grid grid-cols-1 gap-1 pl-4 pr-4 place-items-start" aria-label="Sidebar"
+        >
             <p className={"mb-2"}>Menu</p>
 
             {/* Page Links */}
@@ -33,7 +33,7 @@ const Sidebar: React.FC = memo(() => {
                 {sidebarItems.map((link) => (
                     <li
                         key={link.name}
-                        className={"mb-2 hover:text-white hover:font-medium hover:border"}>
+                        className={"mb-2 hover:p-2 hover:font-medium hover:border list-none"}>
                         <NavLink
                             to={link.href}
                             className={({ isActive}) =>

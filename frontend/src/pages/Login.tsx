@@ -3,7 +3,7 @@ import React, {useState} from "react"
 import {useTokenContext} from "../components/TokenContext.tsx";
 
 const Login = () => {
-    const {user, setUser, setToken} = useTokenContext();
+    const {setToken} = useTokenContext();
 
     const [loginForm, setLoginForm] = useState({uname: "", pw: ""});
     const [failedLogin, setFailedLogin] = useState(false);
@@ -17,15 +17,12 @@ const Login = () => {
                 username: loginForm.uname,
                 password: loginForm.pw
             }
-        }).then((result) => {
+        }).then(async (result) => {
             console.log(result.data);
             setToken(result.data.token);
             setFailedLogin(false);
-            getUser(); //update the user for the application
-            // setTimeout(() => {
-            //     window.location.href = import.meta.env.VITE_APP_CATALOG_URL; // Redirect to catalog
-            // }, 3000);
-        }).catch((error) => {
+            window.location.href = import.meta.env.VITE_APP_CATALOG_URL; // Redirect to catalog
+        }).catch(async (error) => {
             setFailedLogin(true);
             if (error.response) {
                 console.log(error.response);
@@ -40,23 +37,6 @@ const Login = () => {
         }));
 
         event.preventDefault();
-    }
-    const getUser = ()=>{
-        console.log(`user retrieved? ${user.username}`)
-        axios({
-            baseURL: "http://localhost:5000",
-            url: "user",
-            method: "get"
-        }).then((result) => {
-            console.log(result.data);
-            setUser(result.data.user);
-        }).catch((error) => {
-            if (error.response) {
-                console.log(error.response);
-                console.log(error.response.status);
-                console.log(error.response.headers);
-            }
-        });
     }
 
     const logoutU = () =>{
@@ -88,7 +68,7 @@ const Login = () => {
             <p className={"text-red-400"}>Please check credentials and try again.</p>
             : <></>
         }
-        <div className="card">
+        <div>
             <button onClick={() => window.location.href = import.meta.env.VITE_APP_SIGNUP_URL }>
                 Go To Signup
             </button>

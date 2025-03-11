@@ -14,6 +14,9 @@ def create_app():
 
     app.secret_key = SECRET_KEY
 
+    app.config["CORS_HEADERS"] = "Content-Type"
+    CORS(app)
+
     # Configure JWT Manager for session mgt.
     app.config["JWT_SECRET_KEY"] = SECRET_KEY
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=2)
@@ -24,9 +27,6 @@ def create_app():
         # defines how current_user is determined
         username = jwt_data["sub"]
         return User.objects(username=username).first() or None
-
-    CORS(app)
-    app.config["CORS_HEADERS"] = "Content-Type"
 
     from .src import src as main_blueprint
     from .tests import tests as tests_blueprint

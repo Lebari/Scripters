@@ -14,7 +14,7 @@ const Catalog = () => {
         }).then((result) => {
             console.log(result);
             setSuccess(true);
-            setCatalogsList(result.data["All Auctions"]);
+            setCatalogsList(result.data.auctions);
         }).catch((error) => {
             if (error.response) {
                 console.log(error.response);
@@ -27,7 +27,7 @@ const Catalog = () => {
     return(
         <div className={"flex flex-col items-center gap-4"}>
         <h1>Scripters Auction Platform - Catalog</h1>
-        <div className="card">
+        <div>
             <button onClick={getAllAuctions }>
                 View all auctions
             </button>
