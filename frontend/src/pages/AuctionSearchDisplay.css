@@ -1,0 +1,101 @@
+/* Main container */
+.auction-search-display-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  background: #fff;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Heading */
+.auction-search-display-heading {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+/* Form styling using grid */
+.auction-search-display-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* Form group (each field & label) */
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Input & select styling */
+.auction-search-display-input,
+.auction-search-display-select {
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+/* Full-width button spans two columns */
+.auction-search-display-button {
+  grid-column: span 2;
+  padding: 0.75rem;
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: background-color 0.3s ease;
+  margin-top: 0.5rem;
+}
+
+.auction-search-display-button:hover {
+  background-color: #43a047;
+}
+
+.auction-search-display-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Table styling */
+.auction-search-display-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.auction-search-display-table th,
+.auction-search-display-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.auction-search-display-table th {
+  background-color: #f7f7f7;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.auction-search-display-table tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Empty state text */
+.auction-search-display-empty {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #888;
+  margin-top: 1rem;
+}
+
+/* Footer for Bid button */
+.auction-search-display-footer {
+  text-align: right;
+  margin-top: 1rem;
+}
