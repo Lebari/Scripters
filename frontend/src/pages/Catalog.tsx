@@ -9,7 +9,7 @@ const Catalog = () => {
     const getAllAuctions = () =>{
         axios({
             baseURL: "http://localhost:5000",
-            url: "catalog",
+            url: "catalog/",
             method: "get",
         }).then((result) => {
             console.log(result);

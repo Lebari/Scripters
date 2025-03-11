@@ -3,7 +3,7 @@ from ..validations import validate_new_auction, seller_required
 from ...models import Auction, Item, AuctionType
 from flask import jsonify, request
 from datetime import datetime
-from flask_login import current_user, login_required
+from flask_jwt_extended import jwt_required, current_user
 
 
 @catalog.route("/", methods=["GET"])
@@ -31,7 +31,7 @@ def get_auction(slug):
 
 
 @catalog.route("/upload", methods=["POST"])
-@login_required
+@jwt_required()
 @validate_new_auction
 def upload_auction():
     print("Hello from upload_auction")

@@ -12,6 +12,7 @@ import axios from "axios";
 
 import { useEffect } from "react";
 import {useTokenContext} from "./components/TokenContext.tsx";
+import Upload from "./pages/Upload.tsx";
 
 function App() {
     //session tracking
@@ -52,16 +53,12 @@ function App() {
                   <Route path={import.meta.env.VITE_APP_SIGNUP_URL} element={ <SignUp/> }/>
                   <Route path={import.meta.env.VITE_APP_LOGIN_URL} element={ <Login/> }/>
                   <Route path={import.meta.env.VITE_APP_LOGOUT_URL} element={ <Logout/> }/>
+                  <Route path={import.meta.env.VITE_APP_UPLOAD_URL} element={ <Upload/> }/>
 
                   {/* Combined Auction Search & Display Page */}
-                  <Route
-                      path={import.meta.env.VITE_APP_SEARCH_URL}
-                      element={<AuctionSearchDisplay />}
-                  />
-
+                  <Route path={import.meta.env.VITE_APP_SEARCH_URL} element={<AuctionSearchDisplay />}/>
                   {/* Forward Auction Bidding Page */}
                   <Route path={import.meta.env.VITE_APP_UC31FWDBIDDING_URL} element={<ForwardBidding />} />
-
                   {/* Dutch Auction Bidding Page */}
                   <Route path={import.meta.env.VITE_APP_UC31FWDBIDDING_URL} element={<DutchBidding />} />
               </Routes>

@@ -14,13 +14,15 @@ def validate_new_auction(f):
         data = request.json
 
         name = data["name"]
-        price = data["price"]
+        price = int(data["price"])
         status = data["status"]
         category = data["category"]
 
         slug = data["slug"]
-        duration = data["duration"]
+        duration = int(data["duration"])
         auction_type = data["auction_type"]
+
+        print(f"typ {auction_type}")
 
         # validate the data for item and auction
         #   name should be a string
