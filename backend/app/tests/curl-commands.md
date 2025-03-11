@@ -94,3 +94,28 @@ curl --location --request PATCH 'http://127.0.0.1:5000/become_seller' \
 curl --location --request PATCH 'http://127.0.0.1:5000/remove_seller' \
 --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc0MTU4MDI0NywianRpIjoiYjM0YTBlZmYtYjZkZS00NGYxLTk0MDktYWJkZDg4M2Q2ZmU2IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImhpeWEiLCJuYmYiOjE3NDE1ODAyNDcsImNzcmYiOiI0NzFiNjM2My02MjAyLTRiOGMtOGMyMi05ZjhlNjc4MGY3MmQiLCJleHAiOjE3NDE1ODc0NDd9.9UdgDEC_SKjBPpxOjH6veqNe3cwwxmX3DXZ4dM7z8gg'
 ```
+
+
+## Generate Receipt
+```
+curl -X POST http://127.0.0.1:5000/receipt \
+-H "Content-Type: application/json" \
+-d '{
+"purchase_id": "67cf1a30c81816310373af8e"
+}'
+```
+
+## Generate Payment
+```
+curl -X POST http://127.0.0.1:5000/payment \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+-d '{
+"auction_id": "67cba9d6000720ea7a0c9977",
+"card_number": "4111111111111111",
+"card_name": "John Doe",
+"exp_date": "12/26",
+"security_code": "123",
+"shipping_address": "123 Main Street, New York, NY 10001"
+}'
+```
