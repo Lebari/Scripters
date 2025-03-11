@@ -6,6 +6,8 @@ export default {
   },
   purge: [],
   theme: {
+    extend:{
+
       colors: {
         red: '#DA2C38',
         brown: '#43291F',
@@ -26,6 +28,7 @@ export default {
         '4xl': '2.441rem',
         '5xl': '3.052rem',
       }
+    }
   },
   variants: {},
   plugins: [],

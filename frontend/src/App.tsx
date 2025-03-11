@@ -13,17 +13,18 @@ import axios from "axios";
 import { useEffect } from "react";
 import {useTokenContext} from "./components/TokenContext.tsx";
 import Upload from "./pages/Upload.tsx";
+import AuctionPage from "./pages/AuctionPage.tsx";
 
 function App() {
     //session tracking
-    const {user, setUser} = useTokenContext();
+    const {user, setUser, token} = useTokenContext();
 
   const getUser = ()=>{
       axios({
           baseURL: "http://localhost:5000",
           url: "user",
           method: "get"
-      }).then(async (result) => {
+      }).then((result) => {
           console.log(result.data);
           setUser(result.data.user);
           console.log(`user retrieved? ${user.username}`)
@@ -35,7 +36,7 @@ function App() {
           }
       });
   }
-    useEffect(() => {getUser();}, []);
+    useEffect(() => {getUser();}, [token]);
 
   return (
       <div className="min-h-screen flex flex-row gap-8 bg-black">
@@ -50,6 +51,7 @@ function App() {
               <Routes>
                   <Route index element={ <Catalog/> }/>
                   <Route path={import.meta.env.VITE_APP_CATALOG_URL} element={ <Catalog/> }/>
+                  <Route path="/catalog/:name" element={<AuctionPage />} />
                   <Route path={import.meta.env.VITE_APP_SIGNUP_URL} element={ <SignUp/> }/>
                   <Route path={import.meta.env.VITE_APP_LOGIN_URL} element={ <Login/> }/>
                   <Route path={import.meta.env.VITE_APP_LOGOUT_URL} element={ <Logout/> }/>

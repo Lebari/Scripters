@@ -1,12 +1,23 @@
 import axios from "axios";
-import React, {useState} from "react"
+import React, {useRef, useState} from "react"
 import {useTokenContext} from "../components/TokenContext.tsx";
+import {useNavigate} from "react-router-dom";
+import Button from "../components/Button.tsx";
 
 const Login = () => {
     const {setToken} = useTokenContext();
 
     const [loginForm, setLoginForm] = useState({uname: "", pw: ""});
     const [failedLogin, setFailedLogin] = useState(false);
+    const navigate = useNavigate();
+    const isNavigating = useRef(false);
+
+    const goToCatalogPage = () => {
+        if (isNavigating.current) return;
+        isNavigating.current = true;
+        navigate(`/catalog`);
+    };
+
     const loginU = (event: React.FormEvent) =>{
         console.log(`user ${loginForm.uname} pw ${loginForm.pw}`)
         axios({
@@ -21,7 +32,8 @@ const Login = () => {
             console.log(result.data);
             setToken(result.data.token);
             setFailedLogin(false);
-            window.location.href = import.meta.env.VITE_APP_CATALOG_URL; // Redirect to catalog
+
+            goToCatalogPage();
         }).catch(async (error) => {
             setFailedLogin(true);
             if (error.response) {
@@ -61,7 +73,7 @@ const Login = () => {
                     <label htmlFor={"pw"}>Password</label>
                     <input type={"text"} name={"pw"} value={loginForm.pw} onChange={updateForm}/>
 
-                    <input type={"submit"} name={"submit"} onClick={loginU}/>
+                    <Button type={"submit"} name={"submit"} onClick={loginU}>Log In</Button>
                 </div>
             </form>
         {failedLogin?
@@ -69,12 +81,10 @@ const Login = () => {
             : <></>
         }
         <div>
-            <button onClick={() => window.location.href = import.meta.env.VITE_APP_SIGNUP_URL }>
+            <Button onClick={() => window.location.href = import.meta.env.VITE_APP_SIGNUP_URL }>
                 Go To Signup
-            </button>
-            <button onClick={logoutU }>
-                Logout
-            </button>
+            </Button>
+            <Button onClick={logoutU }>Logout</Button>
         </div>
         </div>
     )
