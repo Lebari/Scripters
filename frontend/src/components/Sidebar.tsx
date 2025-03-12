@@ -10,7 +10,7 @@ const sidebarItems: SidebarLink[] = [
     { name: "UC1.1: Sign Up", href: import.meta.env.VITE_APP_SIGNUP_URL },
     { name: "UC1.2: Login", href: import.meta.env.VITE_APP_LOGIN_URL },
     { name: "UC1: Logout", href: import.meta.env.VITE_APP_LOGOUT_URL },
-    { name: "UC2: Browse Catalogue of Auctions", href: import.meta.env.VITE_APP_CATALOG_URL },
+    { name: "UC2: Browse Catalogue of Auctions", href: import.meta.env.VITE_APP_SEARCH_URL },
     { name: "UC3.1: Forward Auction Bidding", href: import.meta.env.VITE_APP_UC31FWDBIDDING_URL },
     { name: "UC3.2: Dutch Auction Bidding", href: import.meta.env.VITE_APP_UC32DCHBIDDING_URL },
     { name: "UC4: Auction Ended", href: import.meta.env.VITE_APP_UC4END_URL },
