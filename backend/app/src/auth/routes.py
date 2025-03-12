@@ -2,13 +2,13 @@ from . import auth
 from ...models import User
 
 from flask import jsonify, request
-from ..validations import validate_user
-from flask_login import login_user, logout_user, login_required, current_user
+from ..validations import validate_new_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_jwt_extended import unset_jwt_cookies, create_access_token, jwt_required, current_user
 
 
 @auth.route("/signup", methods=["POST"])
-@validate_user
+@validate_new_user
 def signup():
     print("Hello from signup")
     data = request.json
@@ -51,44 +51,25 @@ def login():
         password = check_password_hash(user.password, data["password"])
 
         if user and password:
-            login_user(user)
-            # TODO replace flask-login with token session mgt
-            return jsonify({"message": "Sign in successful"}), 201
+            token = create_access_token(identity=username)
+            print(token)
+            return jsonify({"token": token}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
 
 @auth.route("/logout", methods=["POST"])
+@jwt_required()
 def logout():
     print("Hello from logout")
     try:
-        logout_user()
-        return jsonify({"message": "Sign out successful"}), 201
+        token = request.headers.get("Authorization").split(" ")[1]
+
+        print(f"current_user.username {current_user}")
+
+        response = jsonify({"message": "Sign out successful"})
+        unset_jwt_cookies(response)
+        return response, 201
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-
-@auth.route("/become_seller", methods=["PATCH"])
-@login_required
-def become_seller():
-    print("Hello from become_seller")
-    try:
-        user = User.objects(username=current_user.username).first()
-        user.is_seller = True
-        user.save()
-        return jsonify({"message": "User now has seller access"}), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
-
-
-@auth.route("/remove_seller", methods=["PATCH"])
-@login_required
-def remove_seller():
-    print("Hello from remove_seller")
-    try:
-        user = User.objects(username=current_user.username).first()
-        user.is_seller = False
-        user.save()
-        return jsonify({"message": "User no longer has seller access"}), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400

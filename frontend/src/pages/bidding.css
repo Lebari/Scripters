@@ -1,0 +1,90 @@
+/* Container for the entire page */
+.bidding-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 1rem;
+    text-align: center;
+  }
+  
+  /* Main heading (e.g., "Forward Auction Bidding" or "Dutch Auction Purchase") */
+  .bidding-heading {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #2f3e46;
+  }
+  
+  /* Card-like container for item info and form */
+  .bidding-card {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: left;
+  }
+  
+  /* Item name or title */
+  .bidding-item-name {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+  
+  /* Current bid or price info */
+  .bidding-current-bid {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    color: #555;
+  }
+  
+  /* The form layout */
+  .bidding-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* Label for the input */
+  .bidding-label {
+    font-weight: 500;
+    color: #333;
+  }
+  
+  /* Input for bid/price */
+  .bidding-input {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+  
+  /* Main button (e.g., "Place Bid" or "Buy Now") */
+  .bidding-button {
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+    align-self: flex-start;
+  }
+  
+  .bidding-button:hover {
+    background-color: #005f99;
+  }
+  
+  /* Error and success messages */
+  .bidding-error {
+    color: #d00;
+    margin-top: 0.5rem;
+  }
+  
+  .bidding-success {
+    color: #0a0;
+    margin-top: 0.5rem;
+  }
+  

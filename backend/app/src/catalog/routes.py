@@ -3,7 +3,7 @@ from ..validations import validate_new_auction, seller_required
 from ...models import Auction, Item, AuctionType
 from flask import jsonify, request
 from datetime import datetime
-from flask_login import current_user, login_required
+from flask_jwt_extended import jwt_required, current_user
 
 
 @catalog.route("/", methods=["GET"])
@@ -15,7 +15,7 @@ def get_all_auctions():
     for auction in auctions:
         auctions_json.append(auction.to_json())
 
-    return jsonify({"All Auctions": auctions_json}), 201
+    return jsonify({"auctions": auctions_json}), 201
 
 
 @catalog.route("/<slug>", methods=["GET"])
@@ -31,7 +31,7 @@ def get_auction(slug):
 
 
 @catalog.route("/upload", methods=["POST"])
-@login_required
+@jwt_required()
 @validate_new_auction
 def upload_auction():
     print("Hello from upload_auction")
@@ -79,6 +79,7 @@ def upload_auction():
 
 
 @catalog.route("/<slug>/dutch-update", methods=["PATCH"])
+@jwt_required()
 @seller_required
 def update_dutch_auction(slug):
     print("Hello from update_dutch_auction")

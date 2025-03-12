@@ -1,8 +1,10 @@
 # Validate request arguments
 
 from ..models import Auction, AuctionType
-from flask import jsonify, request
-from flask_login import current_user
+
+import jwt
+from flask import request, jsonify
+from flask_jwt_extended import get_current_user
 
 
 def validate_new_auction(f):
@@ -11,13 +13,15 @@ def validate_new_auction(f):
         data = request.json
 
         name = data["name"]
-        price = data["price"]
+        price = int(data["price"])
         status = data["status"]
         category = data["category"]
 
         slug = data["slug"]
-        duration = data["duration"]
+        duration = int(data["duration"])
         auction_type = data["auction_type"]
+
+        print(f"typ {auction_type}")
 
         # validate the data for item and auction
         #   name should be a string
@@ -48,18 +52,7 @@ def validate_new_auction(f):
     return wrapper
 
 
-def seller_required(f):
-    # ensure that logged-in user is a seller
-    def wrapper(*args, **kwargs):
-        if not current_user.is_seller:
-            return jsonify({"error": "User is not a seller"})
-        return f(*args, **kwargs)
-
-    wrapper.__name__ = f.__name__
-    return wrapper
-
-
-def validate_user(f):
+def validate_new_user(f):
     # Validate attributes to create new user
     def wrapper(*args, **kwargs):
         data = request.json
@@ -83,6 +76,33 @@ def validate_user(f):
             return jsonify({"message": "Username must be a non-empty string"}), 400
         if type(password) is not str or str.isspace(password):
             return jsonify({"message": "Password must be a non-empty string"}), 400
+
+        return f(*args, **kwargs)
+
+    wrapper.__name__ = f.__name__
+    return wrapper
+
+
+def seller_required(f):
+    def wrapper(*args, **kwargs):
+        print("CHECKING IF SELLER")
+        token = request.headers.get("Authorization")
+        if not token:
+            return jsonify({"message": "Token is missing!"}), 403
+
+        try:
+            token = token.split(" ")[1] # remove the Bearer tag from token
+            # Get user from token and check if user exists
+            print(f"from seller_required {token}")
+            user = get_current_user()
+            # user = get_user_from_token(token)
+            if not user.is_seller:
+                return jsonify({"message": "User is not a seller."}), 403
+
+        except jwt.ExpiredSignatureError:
+            return jsonify({"message": "Token has expired."}), 403
+        except jwt.InvalidTokenError:
+            return jsonify({"message": "Invalid token."}), 403
 
         return f(*args, **kwargs)
 
