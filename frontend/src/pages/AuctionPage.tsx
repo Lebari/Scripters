@@ -10,47 +10,104 @@ const AuctionPage: React.FC = () => {
     const [auction, setAuction] = useState<AuctionType | null>(location.state as AuctionType);
     const [popupVisible, setPopupVisible] = useState(false); // Controls visibility
 
-    const handleBid = async () => {
+    const [priceInput, setPriceInput] = useState( 0);
+
+    const handleBid = () => {
+        if (!auction) {
+            console.error("Auction is not loaded yet.");
+            return;
+        }
+        if(name){
+        try {
+            // TODO allow for forward bid
+            axios({
+                baseURL: "http://localhost:5000",
+                url: `${encodeURIComponent(name)}/dutch-update`,
+                method: "patch",
+            }).then(async (result) => {
+                console.log(result.data);
+                setPopupVisible(true); // Show the popup
+                setTimeout(() => setPopupVisible(false), 800); // fade popup out
+            }).catch(async (error) => {
+                if (error.response) {
+                    console.log(error.response);
+                    console.log(error.response.status);
+                    console.log(error.response.headers);
+                }
+            });
+        } catch (error) {
+            console.error("Failed to bid:", error);
+        }
+        }
+    };
+
+    const handleDutchUpdate = () => {
         if (!auction) {
             console.error("Auction is not loaded yet.");
             return;
         }
 
+        if(name){
         try {
-            // TODO allow for forward or dutch bid
-            setPopupVisible(true); // Show the popup
-            setTimeout(() => setPopupVisible(false), 800); // fade popup out
+            axios({
+                baseURL: "http://localhost:5000",
+                url: `catalog/${encodeURIComponent(name)}/dutch-update`,
+                method: "patch",
+                data:{
+                    price: priceInput
+                }
+            }).then(async (result) => {
+                console.log(result.data);
+                setPopupVisible(true); // Show the popup
+                setTimeout(() => setPopupVisible(false), 800); // fade popup out
+                getAuctionCall(name);
+            }).catch(async (error) => {
+                if (error.response) {
+                    console.log(error.response);
+                    console.log(error.response.status);
+                    console.log(error.response.headers);
+                }
+            });
         } catch (error) {
             console.error("Failed to bid:", error);
         }
+        }
+    };
+    const getAuction = () => {
+        if (location.state) {
+            setAuction(location.state as AuctionType);
+        } else if (name) {
+            getAuctionCall(name);
+        }
     };
 
-    useEffect(() => {
-        // Reset auction and get new data when route changes
-        const getAuction = () => {
-            if (location.state) {
-                setAuction(location.state as AuctionType);
-            } else if (name) {
-                axios({
-                    baseURL: "http://localhost:5000",
-                    url: `catalog/${encodeURIComponent(name)}`,
-                    method: "get",
-                }).then(async (result) => {
-                    console.log(result.data);
-                    setAuction(result.data.auction);
-                }).catch(async (error) => {
-                    if (error.response) {
-                        console.log(error.response);
-                        console.log(error.response.status);
-                        console.log(error.response.headers);
-                    }
-                });
+    const getAuctionCall = (name: string)=>{
+        axios({
+            baseURL: "http://localhost:5000",
+            url: `catalog/${encodeURIComponent(name)}`,
+            method: "get",
+        }).then(async (result) => {
+            console.log(result.data);
+            setAuction(result.data.auction);
+        }).catch(async (error) => {
+            if (error.response) {
+                console.log(error.response);
+                console.log(error.response.status);
+                console.log(error.response.headers);
             }
-        };
+        });
+    }
 
-        getAuction();
+    useEffect(() => {
+        getAuction(); // Reset auction and get new data when route changes
     }, [name, location.state]);
 
+    const updateForm = (event: React.ChangeEvent<HTMLInputElement>) => {
+        // handle updating the loginForm state whenever a field changes
+        const {value} = event.target
+        setPriceInput(Number.parseInt(value));
+        console.log(priceInput);
+    }
 
     if (!auction) return <div>Loading...</div>;
 
@@ -73,28 +130,34 @@ const AuctionPage: React.FC = () => {
                     <p className="pt-4 text-sm">Last Updated: {auction.date_updated}</p>
 
                     <div className="relative">
-                        <Button
-                            onClick={() => {
-                                if (auction.item.price > 0) {
-                                    handleBid();
-                                }
-                            }}
-                            disabled={auction.item.price === 0} // Disable button when price is 0
-                            className={`${
-                                auction.item.price === 0
-                                    ? 'opacity-50 cursor-not-allowed hover:bg-cream hover:text-black'
-                                    : ''
-                            }`}
+                        {auction.auction_type === "Dutch"?
+                        //     Show button to update price
+                        <div>
+                        <input type={"number"} name={"price"} value={priceInput} onChange={updateForm}></input>
+                        <Button onClick={handleDutchUpdate}
+                                // disabled={priceInput >= 0}
                         >
-                            Add to Cart
+                            Update Price
                         </Button>
+                        </div>
+                        :
+                        //     show button to Bid
+                        <div>
+                        <input type={"number"} name={"price"} value={priceInput} onChange={updateForm}></input>
+                        <Button onClick={handleBid}
+                            // disabled={priceInput >= 0}
+                        >
+                            Bid
+                        </Button>
+                        </div>
+                        }
                         {/* Popup Notification */}
                         <div
-                            className={`absolute -top-3 -left-7 text-coffee px-3 py-1 transition-opacity duration-500 ${
+                            className={`absolute -top-3 -left-7 text-green px-3 py-1 transition-opacity duration-500 ${
                                 popupVisible ? 'opacity-100 text-red' : 'opacity-0 pointer-events-none'
                             }`}
                         >
-                            {auction.item.price === 0 ? '' : 'Bid Placed!'}
+                            {auction.item.price === 0 ? '' : 'Success!'}
                         </div>
                     </div>
                 </div>

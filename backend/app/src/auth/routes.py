@@ -2,13 +2,13 @@ from . import auth
 from ...models import User
 
 from flask import jsonify, request
-from ..validations import validate_user
+from ..validations import validate_new_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import unset_jwt_cookies, create_access_token, jwt_required, current_user
 
 
 @auth.route("/signup", methods=["POST"])
-@validate_user
+@validate_new_user
 def signup():
     print("Hello from signup")
     data = request.json
@@ -73,28 +73,3 @@ def logout():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-
-@auth.route("/become_seller", methods=["PATCH"])
-@jwt_required()
-def become_seller():
-    print("Hello from become_seller")
-    try:
-        user = current_user
-        user.is_seller = True
-        user.save()
-        return jsonify({"message": "User now has seller access"}), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
-
-
-@auth.route("/remove_seller", methods=["PATCH"])
-@jwt_required()
-def remove_seller():
-    print("Hello from remove_seller")
-    try:
-        user = current_user
-        user.is_seller = False
-        user.save()
-        return jsonify({"message": "User no longer has seller access"}), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400

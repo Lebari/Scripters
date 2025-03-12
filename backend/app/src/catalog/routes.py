@@ -79,6 +79,7 @@ def upload_auction():
 
 
 @catalog.route("/<slug>/dutch-update", methods=["PATCH"])
+@jwt_required()
 @seller_required
 def update_dutch_auction(slug):
     print("Hello from update_dutch_auction")
