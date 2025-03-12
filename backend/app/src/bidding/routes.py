@@ -61,11 +61,7 @@ def buyNow_Dutch(slug):
     auction.date_updated = datetime.now()
     auction.save()
 
-    # Get JSON payload and extract the price for sale
-    data = request.get_json()
-    if not data or "price" not in data:
-        return jsonify({"error": "Missing price in request payload."}), 400
-    sale_price = data["price"]
+    sale_price = auction.item.price
 
     # Create a new Sale object.
     bid = Bid(
