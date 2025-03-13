@@ -26,6 +26,31 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+install reddis server.
+Linux(Debian):
+```
+sudo apt-get update
+sudo apt-get install redis-server
+```
+
+macOS:
+```
+brew install redis
+```
+
+Start the Redis Server:
+linux(Debian):
+```
+sudo service redis-server start
+```
+
+macOS:
+```
+redis-server /usr/local/etc/redis.conf
+```
+
+
+
 Then run the flask server.
 ```
 flask run

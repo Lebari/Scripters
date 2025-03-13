@@ -3,12 +3,11 @@ from flask import jsonify, abort, request
 from ...models import *
 from backend.database import *
 from datetime import datetime
-from flask_login import current_user, login_required
+from flask_jwt_extended import current_user
 
 @bidding.route('/forward/<slug>', methods=['POST'])
 def bid_forward(slug):
-    # this line is temporary for testing needs to be modified later
-    user = User.objects(fname="Jane").first() 
+    user = current_user
 
     auction = Auction.objects(slug=slug).first()
 
@@ -50,7 +49,6 @@ def bid_forward(slug):
     return jsonify({"status": "success", "payment_url": "----"}), 200
 
 @bidding.route('/dutch/<slug>', methods=['POST'])
-@login_required
 def buyNow_Dutch(slug):
     auction = Auction.objects(slug=slug).first()
     if not auction:
@@ -63,11 +61,7 @@ def buyNow_Dutch(slug):
     auction.date_updated = datetime.now()
     auction.save()
 
-    # Get JSON payload and extract the price for sale
-    data = request.get_json()
-    if not data or "price" not in data:
-        return jsonify({"error": "Missing price in request payload."}), 400
-    sale_price = data["price"]
+    sale_price = auction.item.price
 
     # Create a new Sale object.
     bid = Bid(
