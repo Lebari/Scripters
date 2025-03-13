@@ -32,7 +32,7 @@ def create_app():
     logging.basicConfig(level=logging.INFO)
 
 
-    socketio = SocketIO(app)
+    socketio = SocketIO(app, cors_allowed_origins="*")
 
     # Setup Redis client (ensure Redis is running on localhost:6379)
 
@@ -84,10 +84,10 @@ def create_app():
                         data = json.loads(message['data'])
                         # Check which channel the message came from and emit accordingly
                         if message['channel'] == 'auction_expired':
-                            socketio.emit('auction_expired', data, broadcast=True)
+                            socketio.emit('auction_expired', data)
                             logging.info(f"Forwarded auction expired event: {data}")
                         elif message['channel'] == 'auction_price_changed':
-                            socketio.emit('auction_price_changed', data, broadcast=True)
+                            socketio.emit('auction_price_changed', data)
                             logging.info(f"Forwarded auction price changed event: {data}")
                     except json.JSONDecodeError as je:
                         logging.error(f"JSON decode error: {je}")

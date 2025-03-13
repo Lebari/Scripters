@@ -1,4 +1,6 @@
 from . import catalog
+import logging
+import json
 from ..validations import validate_new_auction, seller_required
 from ...models import Auction, Item, AuctionType
 from flask import jsonify, request
@@ -78,12 +80,6 @@ def upload_auction():
         return jsonify({"error": str(e)}), 400
 
 
-import json
-import logging
-from datetime import datetime
-from flask import request, jsonify, abort
-from flask_jwt_extended import jwt_required, current_user
-from backend.app.models import Auction, AuctionType, Item
 from backend.app import redis_client  # Ensure redis_client is imported from your app
 
 @catalog.route("/<slug>/dutch-update", methods=["PATCH"])
@@ -131,6 +127,7 @@ def update_dutch_auction(slug):
         }
         try:
             redis_client.publish('auction_price_changed', json.dumps(event_data))
+            print("--------------------alsdkhasldhalsdkhaosdhalskd")
             logging.info(f"Published price update event: {event_data}")
         except Exception as pub_err:
             logging.error(f"Error publishing price update event: {pub_err}")
