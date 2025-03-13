@@ -11,6 +11,12 @@ from flask_socketio import SocketIO
 from apscheduler.schedulers.background import BackgroundScheduler
 import redis
 
+try:
+    redis_client = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
+    redis_client.ping()
+except redis.RedisError as e:
+    logging.error(f"Redis connection error: {e}")
+    raise
 
 def create_app():
     # Configure Flask
@@ -25,21 +31,16 @@ def create_app():
     # Configure logging
     logging.basicConfig(level=logging.INFO)
 
+
     socketio = SocketIO(app)
 
     # Setup Redis client (ensure Redis is running on localhost:6379)
-    try:
-        redis_client = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
-        redis_client.ping()
-    except redis.RedisError as e:
-        logging.error(f"Redis connection error: {e}")
-        raise
 
-    
     def check_expired_auctions():
         """
         Query active auctions with type 'forward' and check if their expiration time has passed.
-        For each expired auction, mark it as inactive and publish an event.
+        For each expired auction, mark it as inactive, determine the winner (auction.event.user), 
+        and publish an event with the auction ID, expiration timestamp, and winner information.
         """
         now = datetime.utcnow()
         # Query auctions where is_active is True and auction_type is 'forward'
@@ -52,10 +53,18 @@ def create_app():
                 # Mark auction as expired
                 auction.is_active = False
                 auction.save()
-                # Create event data
+                
+                # Determine the winner: assuming auction.event exists and has a 'user' field
+                winner_id = None
+                if auction.event and hasattr(auction.event, 'user') and auction.event.user:
+                    # You may also include additional winner details if needed
+                    winner_id = auction.event.user.get_id()
+                
+                # Create event data with the auction ID, expiration time, and winner info
                 event_data = {
                     'auction_id': auction.get_id(),
-                    'expired_at': expiration_time.timestamp()
+                    'expired_at': expiration_time.timestamp(),
+                    'winner': winner_id
                 }
                 try:
                     redis_client.publish('auction_expired', json.dumps(event_data))
@@ -63,21 +72,23 @@ def create_app():
                 except Exception as e:
                     logging.error(f"Error publishing auction {auction.get_id()}: {e}")
 
-    # Set up APScheduler to run the auction expiration check every 10 seconds (adjust as needed)
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(func=check_expired_auctions, trigger="interval", seconds=10, id="auction_job")
-    scheduler.start()
 
     def redis_listener():
         pubsub = redis_client.pubsub()
         try:
-            pubsub.subscribe('auction_expired')
+            # Subscribe to multiple channels
+            pubsub.subscribe('auction_expired', 'auction_price_changed')
             for message in pubsub.listen():
                 if message['type'] == 'message':
                     try:
                         data = json.loads(message['data'])
-                        socketio.emit('auction_expired', data, broadcast=True)
-                        logging.info(f"Forwarded auction expired event: {data}")
+                        # Check which channel the message came from and emit accordingly
+                        if message['channel'] == 'auction_expired':
+                            socketio.emit('auction_expired', data, broadcast=True)
+                            logging.info(f"Forwarded auction expired event: {data}")
+                        elif message['channel'] == 'auction_price_changed':
+                            socketio.emit('auction_price_changed', data, broadcast=True)
+                            logging.info(f"Forwarded auction price changed event: {data}")
                     except json.JSONDecodeError as je:
                         logging.error(f"JSON decode error: {je}")
                     except Exception as inner_e:
@@ -85,7 +96,8 @@ def create_app():
         except Exception as e:
             logging.error(f"Error in Redis listener: {e}")
 
-    socketio.start_background_task(redis_listener)
+
+    
 
     # Configure JWT Manager for session mgt.
     app.config["JWT_SECRET_KEY"] = SECRET_KEY
@@ -106,4 +118,13 @@ def create_app():
     app.register_blueprint(tests_blueprint)
 
     init_db()
+
+
+    # Set up APScheduler to run the auction expiration check every 10 seconds (adjust as needed)
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(func=check_expired_auctions, trigger="interval", seconds=10, id="auction_job")
+    scheduler.start()
+
+    socketio.start_background_task(redis_listener)
+
     return app

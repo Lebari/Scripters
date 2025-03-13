@@ -10,6 +10,7 @@ interface RawAuction {
   item?: {
     id: string;
     name: string;
+    price: number; // ensure price is here
     // other item fields...
   };
   bids?: any[]; // or a typed array if you know the shape
@@ -37,8 +38,8 @@ function AuctionSearchDisplay() {
   function normalizeAuction(raw: RawAuction): Auction {
     const name = raw.item?.name ?? "Unnamed";
     const aType = raw.auction_type ?? "Unknown";
-    // If you want a real currentBid, compute from raw.bids or something else
-    const cBid = 0;
+    // Use the item's price as the current bid
+    const cBid = raw.item?.price || 0;
 
     return {
       id: raw.id,
@@ -103,6 +104,7 @@ function AuctionSearchDisplay() {
     if (selectedAuction.auctionType === "Forward") {
       navigate(import.meta.env.VITE_APP_UC31FWDBIDDING_URL, { state: { auction: selectedAuction } });
     } else if (selectedAuction.auctionType === "Dutch") {
+      // Pass the auction (which now includes the current bid, i.e. item.price) to DutchBidding
       navigate(import.meta.env.VITE_APP_UC32DCHBIDDING_URL, { state: { auction: selectedAuction } });
     } else {
       console.log("Unknown auction type:", selectedAuction.auctionType);

@@ -1,14 +1,32 @@
-import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { io } from "socket.io-client";
 import "./bidding.css";
 
 function DutchBidding() {
   const location = useLocation();
   const auction = location.state?.auction;
-  
+  const navigate = useNavigate();
+
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  // Use auction?.item?.price (or 0 if undefined) as the initial price
+  const [currentPrice, setCurrentPrice] = useState(auction?.currentBid || 0);
+
+  // Connect to backend via Socket.IO to listen for price update events
+  useEffect(() => {
+    const socket = io("http://localhost:5000");
+    socket.on("auction_price_changed", (data: any) => {
+      if (auction && data.auction_id === auction.slug) {
+        // Update the current price with the new price from the event data
+        setCurrentPrice(data.new_price);
+      }
+    });
+    return () => {
+      socket.disconnect();
+    };
+  }, [auction]);
 
   if (!auction) {
     return (
@@ -21,13 +39,13 @@ function DutchBidding() {
   const handleBuyNow = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // POST to your Dutch auction endpoint without any price input
+    // POST to your Dutch auction endpoint using the current price
     axios
-      .post(`http://localhost:5000/bidding/dutch/${auction.slug}`, { price: auction.currentBid })
+      .post(`http://localhost:5000/bidding/dutch/${auction.slug}`, { price: currentPrice })
       .then((response) => {
         if (response.data.status === "success") {
-          setMessage("Purchase successful!");
-          setError("");
+          // On successful purchase, redirect to the auction ended page
+          navigate("/auction-ended", { state: { auction, user: location.state?.user } });
         } else {
           setError("Failed to process purchase.");
           setMessage("");
@@ -45,7 +63,7 @@ function DutchBidding() {
       <div className="bidding-card">
         <h3 className="bidding-item-name">{auction.name}</h3>
         <p className="bidding-current-bid">
-          <strong>Current Price:</strong> {auction.currentBid || 0}
+          <strong>Current Price:</strong> {currentPrice}
         </p>
 
         <form onSubmit={handleBuyNow} className="bidding-form">
