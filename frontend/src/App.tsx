@@ -7,6 +7,10 @@ import Logout from "./pages/Logout.tsx";
 import AuctionSearchDisplay from "./pages/AuctionSearchDisplay.tsx"; // Updated combined component
 import ForwardBidding from "./pages/ForwardBidding.tsx";
 import DutchBidding from "./pages/DutchBidding.tsx";
+import Payment from "./pages/Payment.tsx";
+import Receipt from "./pages/Receipt.tsx";
+
+
 
 import axios from "axios";
 
@@ -57,6 +61,10 @@ function App() {
                   <Route path={import.meta.env.VITE_APP_LOGIN_URL} element={ <Login/> }/>
                   <Route path={import.meta.env.VITE_APP_LOGOUT_URL} element={ <Logout/> }/>
                   <Route path={import.meta.env.VITE_APP_UPLOAD_URL} element={ <Upload/> }/>
+                  <Route path={import.meta.env.VITE_APP_UC5PAY_URL} element={<Payment />} />
+
+
+
 
                   {/* Combined Auction Search & Display Page */}
                   <Route path={import.meta.env.VITE_APP_SEARCH_URL} element={<AuctionSearchDisplay />}/>
@@ -67,6 +75,8 @@ function App() {
 
 
                   <Route path={import.meta.env.VITE_APP_UPDATE_URL} element={<UC7UpdateDutchPage />} />
+                  <Route path={import.meta.env.VITE_APP_UC6RECEIPT_URL} element={<Receipt />} />
+
               </Routes>
           </div>
       </div>
