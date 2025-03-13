@@ -1,4 +1,6 @@
 from . import catalog
+import logging
+import json
 from ..validations import validate_new_auction, seller_required
 from ...models import Auction, Item, AuctionType
 from flask import jsonify, request
@@ -78,6 +80,8 @@ def upload_auction():
         return jsonify({"error": str(e)}), 400
 
 
+from backend.app import redis_client  # Ensure redis_client is imported from your app
+
 @catalog.route("/<slug>/dutch-update", methods=["PATCH"])
 @jwt_required()
 @seller_required
@@ -87,22 +91,49 @@ def update_dutch_auction(slug):
     try:
         # Retrieve auction from database
         auction = Auction.objects(slug=slug).first()
-        # get price from json
-        new_price = request.json["price"]
+        if not auction:
+            return jsonify({"error": "Auction not found."}), 404
+
+        # Get the new price from JSON request body
+        new_price = request.json.get("price")
+        if new_price is None:
+            return jsonify({"error": "Price is required."}), 400
 
         if new_price < 0:
             return jsonify({"error": "Price must be non-negative."}), 400
+
         if auction.auction_type != AuctionType.DUTCH:
             return jsonify({"error": "Auction must be of type dutch."}), 400
+
         if not auction.is_active:
             return jsonify({"error": "Auction must be active to update."}), 400
+
         if current_user.id != auction.seller.id:
             return jsonify({"error": "User is not auction's seller."}), 400
 
+        # Update the item price
         item = Item.objects(id=auction.item.id).first()
+        if not item:
+            return jsonify({"error": "Item not found."}), 404
+
         item.price = new_price
         item.save()
 
+        # Publish a price update event to Redis for frontend notification
+        event_data = {
+            'auction_id': auction.get_id(),
+            'new_price': new_price,
+            'updated_at': datetime.now().timestamp()
+        }
+        try:
+            redis_client.publish('auction_price_changed', json.dumps(event_data))
+            print("--------------------alsdkhasldhalsdkhaosdhalskd")
+            logging.info(f"Published price update event: {event_data}")
+        except Exception as pub_err:
+            logging.error(f"Error publishing price update event: {pub_err}")
+
         return jsonify({"message": "Auction price updated"}), 201
     except Exception as e:
+        logging.error(f"Error in update_dutch_auction: {e}")
         return jsonify({"error": str(e)}), 400
+

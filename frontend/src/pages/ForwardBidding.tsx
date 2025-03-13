@@ -33,7 +33,7 @@ function ForwardBidding() {
 
     // POST to forward bidding endpoint
     axios
-      .post(`http://localhost:5000/bidding/forward/${auction.slug}`, { price: bidPrice })
+      .post(`http://localhost:5000/bid/forward/${auction.slug}`, { price: bidPrice })
       .then((response) => {
         if (response.data.status === "success") {
           setMessage("Bid placed successfully!");
