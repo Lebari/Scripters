@@ -1,9 +1,7 @@
-from flask import Blueprint, jsonify, request, abort
-from flask_login import login_required, current_user
+from flask import Blueprint, jsonify, request
+from flask_jwt_extended import jwt_required, current_user
 from bson import ObjectId
 from ...models import Payment, Auction, Event
-import uuid
-import json
 from datetime import datetime
 
 payment_bp = Blueprint("payment", __name__)
@@ -14,7 +12,7 @@ def test_payment():
     return jsonify({"message": "Hi"}), 200
 
 @payment_bp.route("/payment", methods=["POST"])
-@login_required
+@jwt_required()
 def process_payment():
     """Process payment for an auction item"""
     try:
@@ -69,7 +67,7 @@ def process_payment():
         return jsonify({"error": str(e)}), 400
 
 @payment_bp.route("/receipt", methods=["POST"])
-@login_required
+@jwt_required()
 def generate_receipt():
     """Generate a receipt for a completed payment"""
     try:
@@ -87,8 +85,8 @@ def generate_receipt():
 
         if not id_found:
             return jsonify({"error": "Purchase ID not found in user's purchases"}), 404
+        
         payment = Payment.objects(id=id_found).first()
-
         if not payment:
             return jsonify({"error": "Payment record not found"}), 404
 
