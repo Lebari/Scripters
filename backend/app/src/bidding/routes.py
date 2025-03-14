@@ -1,14 +1,13 @@
 from . import bidding
 from flask import jsonify, abort, request
 from ...models import *
-from backend.database import *
 from datetime import datetime
-from flask_jwt_extended import current_user
+from flask_jwt_extended import current_user, jwt_required
+
 
 @bidding.route('/forward/<slug>', methods=['POST'])
+@jwt_required()
 def bid_forward(slug):
-    user = current_user
-
     auction = Auction.objects(slug=slug).first()
 
     if not auction:
@@ -32,15 +31,17 @@ def bid_forward(slug):
 
 
     # Create a new Sale object.
+    print("1")
     bid = Bid(
-        user=user,           # logged in buyer
+        user=current_user,           # logged in buyer
         event_type=EventType.BID,   # type of event
         time=datetime.now(),
         price=bid_price,
         auction=auction,
     )
     bid.save()
-    auction.bids.append(bid)
+    print("2")
+    auction.bids.append(bid.id)
 
     # Link the sale to the auction.
     auction.event = bid
@@ -48,7 +49,9 @@ def bid_forward(slug):
 
     return jsonify({"status": "success", "payment_url": "----"}), 200
 
+
 @bidding.route('/dutch/<slug>', methods=['POST'])
+@jwt_required()
 def buyNow_Dutch(slug):
     auction = Auction.objects(slug=slug).first()
     if not auction:
@@ -85,15 +88,17 @@ def buyNow_Dutch(slug):
 
 @bidding.route("/dutch", methods=["GET"])
 def hello_bidding_dutch():
-    print("Hello from Auth")
+    print("Hello from hello_bidding_dutch")
     return jsonify({"message": "Hello from dutch bidding"}), 201
+
 
 @bidding.route("/forward", methods=["GET"])
 def hello_bidding_forward():
-    print("Hello from Auth")
+    print("Hello from hello_bidding_forward")
     return jsonify({"message": "Hello from forward bidding"}), 201
+
 
 @bidding.route("/", methods=["GET"])
 def hello_bidding():
-    print("Hello from Auth")
+    print("Hello from hello_bidding")
     return jsonify({"message": "Hello from bidding"}), 201

@@ -2,7 +2,7 @@ from . import payment_bp
 
 from flask import jsonify, request
 from flask_jwt_extended import jwt_required, current_user
-from ...models import Payment, Auction
+from ...models import Payment, Auction, Event
 from datetime import datetime
 
 
@@ -19,22 +19,22 @@ def process_payment():
     try:
         data = request.get_json()
         required_fields = ["auction_slug", "card_number", "card_name", "exp_date", "security_code"]
-        
+
         if not all(field in data for field in required_fields):
             return jsonify({"error": "Missing required payment details"}), 400
 
         auction_slug = data["auction_slug"]
-        
+
         auction = Auction.objects(slug=auction_slug).first()
         if not auction:
             return jsonify({"error": "Auction not found"}), 404
 
         winner = auction.event.user  # the event should hold the final bid of the auction
-        
+
         if str(winner.id) != str(current_user.id):
             return jsonify({"error": "You did not win this bid."}), 403
 
-        shipping_address = f"{current_user.streetno} {current_user.street}, {current_user.city}, {current_user.country} {current_user.postal}" 
+        shipping_address = f"{current_user.streetno} {current_user.street}, {current_user.city}, {current_user.country} {current_user.postal}"
 
         # TODO create card object and save for later
         print("got here")
@@ -50,15 +50,75 @@ def process_payment():
 
         payment.save()
 
-        current_user.update(push__purchases=payment.id)
+        print("hello1")
+        # current_user.update(push__purchases=payment.id)
+        current_user.purchases.append(payment.id)
+        print("hello2")
         current_user.reload()
+        print("hello3")
 
         return jsonify({
             "message": "Payment completed successfully. Auction is now inactive.",
             "payment": payment.to_json(),
             "user_purchases": [str(p) for p in current_user.purchases]
         })
-    
+
+    except Exception as e:
+        print(f"Payment processing error: {str(e)}")
+        return jsonify({"error": str(e)}), 400
+
+
+@payment_bp.route("/", methods=["POST"])
+@jwt_required()
+def process_paymentOLD():
+    """Process payment for an auction item"""
+    try:
+        data = request.get_json()
+        required_fields = ["auction_slug", "card_number", "card_name", "exp_date", "security_code"]
+
+        if not all(field in data for field in required_fields):
+            return jsonify({"error": "Missing required payment details"}), 400
+
+        auction_slug = data["auction_slug"]
+
+        auction = Auction.objects(slug=auction_slug).first()
+        if not auction:
+            return jsonify({"error": "Auction not found"}), 404
+
+        auction_event_list = auction.to_mongo().get("bids", [])
+        if not auction_event_list:
+            return jsonify({"error": "No bids found for this auction"}), 400
+
+        auction_event_winner_id = auction_event_list[-1]
+        event_object = Event.objects(id=auction_event_winner_id).first()
+        if not event_object:
+            return jsonify({"error": "Winning bid event not found"}), 404
+
+        if str(event_object.user.id) == str(current_user.id):
+            return jsonify({"error": "You are not the owner who won this bid"}), 403
+
+        shipping_address = f"{current_user.streetno} {current_user.street}, {current_user.city}, {current_user.country} {current_user.postal}"
+
+        payment = Payment(
+            user=current_user,
+            auction=auction,
+            amount=event_object.price,
+            status="Success",
+            timestamp=datetime.utcnow(),
+            shipping_address=shipping_address  # Concatenated address from user object
+        )
+
+        payment.save()
+
+        current_user.update(push__purchases=payment.id)
+        current_user.reload()
+
+        return jsonify({
+            "message": "Auction is inactive. Payment completed successfully.",
+            "payment": payment.to_json(),
+            "user_purchases": [str(p) for p in current_user.purchases]
+        })
+
     except Exception as e:
         print(f"Payment processing error: {str(e)}")
         return jsonify({"error": str(e)}), 400

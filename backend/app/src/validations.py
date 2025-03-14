@@ -32,16 +32,16 @@ def validate_new_auction(f):
         #   slug should be unique in db
         #   auction_type should be "Dutch" or "Forward"
 
-        if type(name) is not str:
-            return jsonify({"message": "Name must be a string"}), 400
+        if not name or type(name) is not str:
+            return jsonify({"message": "Name must be a non-empty string"}), 400
         if price <= 0:
             return jsonify({"message": "Price must be a positive Integer"}), 400
         if duration <= 0:
             return jsonify({"message": "Duration must be a positive Integer"}), 400
-        if type(status) is not bool:
+        if not status or type(status) is not bool:
             return jsonify({"message": "Status must be boolean"}), 400
-        if type(category) is not str:
-            return jsonify({"message": "Category must be a string"}), 400
+        if not category or type(category) is not str:
+            return jsonify({"message": "Category must be a non-empty string"}), 400
         if Auction.objects(slug=slug).first() is not None:
             return jsonify({"message": "Slug must be unique"}), 400
         if (auction_type != AuctionType.DUTCH) and (auction_type != AuctionType.FORWARD.value):

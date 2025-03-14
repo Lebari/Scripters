@@ -1,8 +1,6 @@
 from . import search
 from flask import jsonify, abort, request
 from ...models import *
-from backend.database import *
-from flask_login import current_user, login_required
 
 
 @search.route("/", methods=["GET"])
@@ -16,6 +14,7 @@ def return_all():
     except Exception as e:
         # In case of error, return a 500 error response
         abort(500, description=str(e))
+
 
 @search.route("/", methods=["POST"])
 def search_items():

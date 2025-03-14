@@ -1,4 +1,4 @@
-Last updated March 10th by Greatlove
+Last updated March 13th
 
 # Testing - curl
 
@@ -26,7 +26,25 @@ curl --location 'http://127.0.0.1:5000/myauctions' \
 --header 'Authorization: Bearer <token>'
 ```
 
+## Search Retrieve all
+```
+curl --location --request POST 'http://127.0.0.1:5000/search/' \
+--header 'Content-Type: application/json'
+```
+
+## Search item by keyword
+```
+curl --location --request POST 'http://127.0.0.1:5000/search/' \
+--header 'Content-Type: application/json' \
+--data '{
+    "keyword": "One"
+}'
+```
+Robustness test:
+- No keyword specified in payload
+
 ## Upload auction
+Note: Duration is in minutes and our pub-sub system ensures that auctions become inactive when the duration is over from the time they were added. 
 ```
 curl --location --request POST 'http://127.0.0.1:5000/catalog/upload' \
 --header 'Content-Type: application/json' \
@@ -38,19 +56,26 @@ curl --location --request POST 'http://127.0.0.1:5000/catalog/upload' \
     "category": "New",
     "slug": "myItem",
     "auction_type": "Dutch",
-    "duration": 40
+    "duration": 4000
 }'
 ```
+Robustness test:
+- Slug must be unique
+- Price and duration must be non-negative integers
+- Type must be Dutch or Forward
 
 ## Update dutch auction
+Specify auction slug in the url
 ```
-curl --location --request PATCH 'http://127.0.0.1:5000/catalog/auction5/dutch-update' \
+curl --location --request PATCH 'http://127.0.0.1:5000/catalog/<slug>/dutch-update' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer <token>'
 --data '{
     "price": 20
 }'
 ```
+Robustness test:
+- Auction must be active
 
 ## Signup
 A user must sign in after signup to generate a token.
@@ -121,6 +146,32 @@ curl --location --request PATCH 'http://127.0.0.1:5000/remove_seller' \
 Robustness test:
 - A user must be signed in
 
+## Bidding Dutch - Buy now 
+```
+curl --location --request POST 'http://127.0.0.1:5000/bid/dutch/auction5' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer <token>'
+```
+Robustness test:
+- Auction must be active (duration not over and still up for sale)
+- Auction type must be Dutch
+- Auction slug must be valid
+
+## Bidding Forward - Bid
+```
+curl --location --request POST 'http://127.0.0.1:5000/bid/forward/auction5' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer <token>' \
+--data-raw '{
+    "price": 25
+}'
+``` 
+Robustness test:
+- Auction must be active (duration not over and still up for sale)
+- New bid price must be >= current auction price
+- Auction type must be Forward
+- Auction slug must be valid
+
 ## Make Payment
 ```
 curl --location 'http://127.0.0.1:5000/payment' \
@@ -137,41 +188,6 @@ curl --location 'http://127.0.0.1:5000/payment' \
 Robustness test:
 - Auction slug must exist
 - User must be auction's winner
-
-## Bidding Dutch - Buy now 
-```
-curl --location --request POST 'http://127.0.0.1:5000/bid/dutch/auction5' \
---header 'Content-Type: application/json' \
---header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc0MTU4MDI0NywianRpIjoiYjM0YTBlZmYtYjZkZS00NGYxLTk0MDktYWJkZDg4M2Q2ZmU2IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImhpeWEiLCJuYmYiOjE3NDE1ODAyNDcsImNzcmYiOiI0NzFiNjM2My02MjAyLTRiOGMtOGMyMi05ZjhlNjc4MGY3MmQiLCJleHAiOjE3NDE1ODc0NDd9.9UdgDEC_SKjBPpxOjH6veqNe3cwwxmX3DXZ4dM7z8gg'
-
-```
-
-## Bidding Forward - Bid
-```
-curl --location --request POST 'http://127.0.0.1:5000/bid/forward/auction5' \
---header 'Content-Type: application/json' \
---header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc0MTU4MDI0NywianRpIjoiYjM0YTBlZmYtYjZkZS00NGYxLTk0MDktYWJkZDg4M2Q2ZmU2IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImhpeWEiLCJuYmYiOjE3NDE1ODAyNDcsImNzcmYiOiI0NzFiNjM2My02MjAyLTRiOGMtOGMyMi05ZjhlNjc4MGY3MmQiLCJleHAiOjE3NDE1ODc0NDd9.9UdgDEC_SKjBPpxOjH6veqNe3cwwxmX3DXZ4dM7z8gg' \
---data-raw '{
-    "price": 25
-}'
-``` 
-
-## Search Retrieve all 
-```
-curl --location --request GET 'http://127.0.0.1:5000/search/' \
---header 'Content-Type: application/json' \
---header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc0MTU4MDI0NywianRpIjoiYjM0YTBlZmYtYjZkZS00NGYxLTk0MDktYWJkZDg4M2Q2ZmU2IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImhpeWEiLCJuYmYiOjE3NDE1ODAyNDcsImNzcmYiOiI0NzFiNjM2My02MjAyLTRiOGMtOGMyMi05ZjhlNjc4MGY3MmQiLCJleHAiOjE3NDE1ODc0NDd9.9UdgDEC_SKjBPpxOjH6veqNe3cwwxmX3DXZ4dM7z8gg'
-```
-
-## Search item by keyword 
-```
-curl --location --request POST 'http://127.0.0.1:5000/search/' \
---header 'Content-Type: application/json' \
---header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc0MTU4MDI0NywianRpIjoiYjM0YTBlZmYtYjZkZS00NGYxLTk0MDktYWJkZDg4M2Q2ZmU2IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImhpeWEiLCJuYmYiOjE3NDE1ODAyNDcsImNzcmYiOiI0NzFiNjM2My02MjAyLTRiOGMtOGMyMi05ZjhlNjc4MGY3MmQiLCJleHAiOjE3NDE1ODc0NDd9.9UdgDEC_SKjBPpxOjH6veqNe3cwwxmX3DXZ4dM7z8gg' \
---data-raw '{
-    "keyword": "One"
-}'
-```
 
 ## Generate Receipt
 Get a valid purchase id by first getting the User object from [/user](#get-user-object-for-signed-in-user).
