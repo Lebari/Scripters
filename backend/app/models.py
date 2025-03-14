@@ -97,11 +97,17 @@ class User(UserMixin, Document):
         model_json = self.to_mongo().to_dict()
 
         model_json["broker"] = self.broker.get_id() if self.broker else None
+        print("1")
         model_json["cards"] = [card.get_id() for card in self.cards if card]
+        print("2")
         model_json["sales"] = [sale.get_id() for sale in self.sales if sale]
+        print("3")
         model_json["purchases"] = [purchase.get_id() for purchase in self.purchases if purchase]
+        print("4")
         model_json["subscriptions"] = [sub.get_id() for sub in self.subscriptions if sub]
+        print("5")
         model_json["auctions"] = [auction.get_id() for auction in self.auctions if auction]
+        print("6")
         model_json["id"] = str(model_json["_id"])
         del model_json["_id"]
         return model_json
@@ -145,22 +151,6 @@ class Bid(Event):
     def to_json(self):
         print(f"serializing {self.__str__}")
         return super.to_json()
-
-
-class Sale(Event):
-    card = ReferenceField('Card', required=True)
-
-    def __str__(self):
-        return self.auction.item.name + self.price
-
-    def get_id(self):
-        return str(self.id)
-
-    def to_json(self):
-        print(f"serializing {self.__str__}")
-        model_json = super.to_json()
-        model_json["card"] = self.card.get_id() if self.card else None
-        return model_json
 
 
 class Broker(Document):
@@ -240,6 +230,9 @@ class Payment(Document):
     status = StringField(required=True, choices=["Pending", "Success", "Failed"])
     timestamp = DateTimeField(required=True)
     shipping_address = StringField(required=True)
+
+    def get_id(self):
+        return str(self.id)
 
     def to_json(self):
         return {

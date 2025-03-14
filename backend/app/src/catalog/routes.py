@@ -3,6 +3,7 @@ import logging
 import json
 from ..validations import validate_new_auction, seller_required
 from ...models import Auction, Item, AuctionType
+from backend.app import redis_client
 from flask import jsonify, request
 from datetime import datetime
 from flask_jwt_extended import jwt_required, current_user
@@ -79,8 +80,6 @@ def upload_auction():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-
-from backend.app import redis_client  # Ensure redis_client is imported from your app
 
 @catalog.route("/<slug>/dutch-update", methods=["PATCH"])
 @jwt_required()

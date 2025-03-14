@@ -18,7 +18,7 @@ Install
 - [python3.13.2](https://www.python.org/downloads/release/python-3132/)
 - [venv](https://realpython.com/python-virtual-environments-a-primer/)
 
-Create a python virtual environment named "venv", and install packages based on `requirements.txt`
+Create and activate a python virtual environment named "venv", and install packages based on `requirements.txt`
 
 ```
 python3.12 -m venv "venv"
@@ -26,8 +26,8 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-install reddis server.
-Linux(Debian):
+### Install [redis](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/install-redis-on-mac-os/) server.
+Linux (Debian):
 ```
 sudo apt-get update
 sudo apt-get install redis-server
@@ -38,27 +38,16 @@ macOS:
 brew install redis
 ```
 
-Start the Redis Server:
-linux(Debian):
+### Start Redis Server:
+linux (Debian):
 ```
 sudo service redis-server start
 ```
 
 macOS:
 ```
-redis-server /usr/local/etc/redis.conf
+redis-server
 ```
-
-
-
-Then run the flask server.
-```
-flask run
-```
-
-Visit the /sale, /catalog, and /auth routes by appending them to the server url. For instance,
-
-`http://127.0.0.1:5000/sale`
 
 ### Frontend
 Go to project root directory and install [bun](https://bun.sh/docs/installation)
@@ -70,12 +59,10 @@ cd Scripters/frontend
 bun install
 ```
 
-Run the application
-
-`bun run dev`
-
 ## Running Instructions
-Open two CLI Sessions - one for backend and one for frontend.
+Open three CLI Sessions - one for backend, one for frontend and one for the redis server.
+
+Ensure the redis server is running.
 
 Go to backend directory and run:
 

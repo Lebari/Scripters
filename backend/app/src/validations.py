@@ -61,6 +61,11 @@ def validate_new_user(f):
         lname = data["lname"]
         username = data["username"]
         password = data["password"]
+        streetno = int(data["streetno"])
+        street = data["street"]
+        city = data["city"]
+        country = data["country"]
+        postal = data["postal"]
 
         # validate the data for a new user
         #   fname should be a non-empty string
@@ -68,14 +73,24 @@ def validate_new_user(f):
         #   username should be a non-empty string
         #   password should be a non-empty string
 
-        if type(fname) is not str or str.isspace(fname):
+        if type(fname) is not str or not fname:
             return jsonify({"message": "First Name must be a non-empty string"}), 400
-        if type(lname) is not str or str.isspace(lname):
+        if type(lname) is not str or not lname:
             return jsonify({"message": "Last Name must be a non-empty string"}), 400
-        if type(username) is not str or str.isspace(username):
+        if type(username) is not str or not username:
             return jsonify({"message": "Username must be a non-empty string"}), 400
-        if type(password) is not str or str.isspace(password):
+        if type(password) is not str or not password:
             return jsonify({"message": "Password must be a non-empty string"}), 400
+        if type(streetno) is not int or not data["streetno"]:
+            return jsonify({"message": "Streetno must be a non-empty int passed as a string"}), 400
+        if type(street) is not str or not street:
+            return jsonify({"message": "Street must be a non-empty string"}), 400
+        if type(city) is not str or not city:
+            return jsonify({"message": "City must be a non-empty string"}), 400
+        if type(country) is not str or not country:
+            return jsonify({"message": "Country must be a non-empty string"}), 400
+        if type(postal) is not str or not postal:
+            return jsonify({"message": "Postal must be a non-empty string"}), 400
 
         return f(*args, **kwargs)
 

@@ -22,15 +22,14 @@ def create_app():
     # Configure Flask
     print("creating flask app")
     app = Flask(__name__)
-
     app.secret_key = SECRET_KEY
 
+    # Configure CORS
     app.config["CORS_HEADERS"] = "Content-Type"
     CORS(app)
 
     # Configure logging
     logging.basicConfig(level=logging.INFO)
-
 
     socketio = SocketIO(app, cors_allowed_origins="*")
 
@@ -42,7 +41,7 @@ def create_app():
         For each expired auction, mark it as inactive, determine the winner (auction.event.user), 
         and publish an event with the auction ID, expiration timestamp, and winner information.
         """
-        now = datetime.utcnow()
+        now = datetime.now()
         # Query auctions where is_active is True and auction_type is 'forward'
         active_auctions = Auction.objects(is_active=True, auction_type=AuctionType.FORWARD)
         print(active_auctions)
@@ -96,9 +95,6 @@ def create_app():
         except Exception as e:
             logging.error(f"Error in Redis listener: {e}")
 
-
-    
-
     # Configure JWT Manager for session mgt.
     app.config["JWT_SECRET_KEY"] = SECRET_KEY
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=2)
@@ -110,6 +106,7 @@ def create_app():
         username = jwt_data["sub"]
         return User.objects(username=username).first() or None
 
+    # Register Blueprints
     from .src import src as main_blueprint
     from .tests import tests as tests_blueprint
 
@@ -118,7 +115,6 @@ def create_app():
     app.register_blueprint(tests_blueprint)
 
     init_db()
-
 
     # Set up APScheduler to run the auction expiration check every 10 seconds (adjust as needed)
     scheduler = BackgroundScheduler()

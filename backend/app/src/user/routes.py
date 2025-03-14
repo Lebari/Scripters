@@ -36,9 +36,8 @@ def get_user_auctions():
 def become_seller():
     print("Hello from become_seller")
     try:
-        usero = current_user
-        usero.is_seller = True
-        usero.save()
+        current_user.is_seller = True
+        current_user.save()
         return jsonify({"message": "User now has seller access"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 400
@@ -49,9 +48,8 @@ def become_seller():
 def remove_seller():
     print("Hello from remove_seller")
     try:
-        usero = current_user
-        usero.is_seller = False
-        usero.save()
+        current_user.is_seller = False
+        current_user.save()
         return jsonify({"message": "User no longer has seller access"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 400

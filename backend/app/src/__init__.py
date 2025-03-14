@@ -18,7 +18,7 @@ src.register_blueprint(user_blueprint)
 src.register_blueprint(catalog_blueprint)
 src.register_blueprint(bidding_blueprint)
 src.register_blueprint(search_blueprint)
-src.register_blueprint(payment_blueprint)  # Fix
+src.register_blueprint(payment_blueprint)
 
 
 from . import routes  # Ensure routes exist
