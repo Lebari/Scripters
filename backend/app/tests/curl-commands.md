@@ -138,6 +138,40 @@ Robustness test:
 - Auction slug must exist
 - User must be auction's winner
 
+## Bidding Dutch - Buy now 
+```
+curl --location --request POST 'http://127.0.0.1:5000/bid/dutch/auction5' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc0MTU4MDI0NywianRpIjoiYjM0YTBlZmYtYjZkZS00NGYxLTk0MDktYWJkZDg4M2Q2ZmU2IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImhpeWEiLCJuYmYiOjE3NDE1ODAyNDcsImNzcmYiOiI0NzFiNjM2My02MjAyLTRiOGMtOGMyMi05ZjhlNjc4MGY3MmQiLCJleHAiOjE3NDE1ODc0NDd9.9UdgDEC_SKjBPpxOjH6veqNe3cwwxmX3DXZ4dM7z8gg'
+
+```
+
+## Bidding Forward - Bid
+```
+curl --location --request POST 'http://127.0.0.1:5000/bid/forward/auction5' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc0MTU4MDI0NywianRpIjoiYjM0YTBlZmYtYjZkZS00NGYxLTk0MDktYWJkZDg4M2Q2ZmU2IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImhpeWEiLCJuYmYiOjE3NDE1ODAyNDcsImNzcmYiOiI0NzFiNjM2My02MjAyLTRiOGMtOGMyMi05ZjhlNjc4MGY3MmQiLCJleHAiOjE3NDE1ODc0NDd9.9UdgDEC_SKjBPpxOjH6veqNe3cwwxmX3DXZ4dM7z8gg' \
+--data-raw '{
+    "price": 25
+}'
+``` 
+
+## Search Retrieve all 
+```
+curl --location --request GET 'http://127.0.0.1:5000/search/' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc0MTU4MDI0NywianRpIjoiYjM0YTBlZmYtYjZkZS00NGYxLTk0MDktYWJkZDg4M2Q2ZmU2IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImhpeWEiLCJuYmYiOjE3NDE1ODAyNDcsImNzcmYiOiI0NzFiNjM2My02MjAyLTRiOGMtOGMyMi05ZjhlNjc4MGY3MmQiLCJleHAiOjE3NDE1ODc0NDd9.9UdgDEC_SKjBPpxOjH6veqNe3cwwxmX3DXZ4dM7z8gg'
+```
+
+## Search item by keyword 
+```
+curl --location --request POST 'http://127.0.0.1:5000/search/' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc0MTU4MDI0NywianRpIjoiYjM0YTBlZmYtYjZkZS00NGYxLTk0MDktYWJkZDg4M2Q2ZmU2IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImhpeWEiLCJuYmYiOjE3NDE1ODAyNDcsImNzcmYiOiI0NzFiNjM2My02MjAyLTRiOGMtOGMyMi05ZjhlNjc4MGY3MmQiLCJleHAiOjE3NDE1ODc0NDd9.9UdgDEC_SKjBPpxOjH6veqNe3cwwxmX3DXZ4dM7z8gg' \
+--data-raw '{
+    "keyword": "One"
+}'
+```
 
 ## Generate Receipt
 Get a valid purchase id by first getting the User object from [/user](#get-user-object-for-signed-in-user).
