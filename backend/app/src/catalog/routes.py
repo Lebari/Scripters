@@ -3,9 +3,10 @@ import logging
 import json
 from ..validations import validate_new_auction, seller_required
 from ...models import Auction, Item, AuctionType
-from flask import jsonify, request
+from flask import jsonify, request, current_app
 from datetime import datetime
 from flask_jwt_extended import jwt_required, current_user
+from backend.app import redis_client  # Import redis_client
 
 
 @catalog.route("/", methods=["GET"])
@@ -64,6 +65,10 @@ def upload_auction():
         )
         new_auction.save()
 
+        # Schedule the auction to expire based on its duration
+        current_app.schedule_auction_expiration(new_auction)
+        logging.info(f"Created and scheduled new auction {new_auction.slug} to expire in {new_auction.duration} minutes")
+
         # ensure some user is logged in
         if not current_user:
             return jsonify({"error": "Please log in first"})
@@ -82,8 +87,6 @@ def upload_auction():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-
-from backend.app import redis_client  # Ensure redis_client is imported from your app
 
 @catalog.route("/<slug>/dutch-update", methods=["PATCH"])
 @jwt_required()

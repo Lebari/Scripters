@@ -58,57 +58,55 @@ def bid_forward(slug):
 @bidding.route('/dutch/<slug>', methods=['POST'])
 @jwt_required()
 def buyNow_Dutch(slug):
-    auction = Auction.objects(slug=slug).first()
-    if not auction:
-        abort(404, description="Auction not found.")
-    if not auction.is_active:
-        return jsonify({"error": "Auction is no longer active."}), 400
-
-    # Mark the auction as inactive and update the timestamp
-    auction.is_active = False
-    auction.date_updated = datetime.utcnow()
-    auction.save()
-
-    sale_price = auction.item.price
-
-    # Create a Bid object (similar to forward auction)
-    bid = Bid(
-        user=current_user,
-        event_type=EventType.BID,
-        time=datetime.utcnow(),
-        price=sale_price,
-        auction=auction,
-    )
-    bid.save()
-    auction.bids.append(bid)
-
-    # Link the bid to the auction
-    auction.event = bid
-    auction.save()
-
-    # Also emit an auction_won event for immediate notification
+    print(f"[DUTCH AUCTION] Processing Buy Now request for auction slug: {slug}")
     try:
-        from backend.app import redis_client
+        auction = Auction.objects(slug=slug).first()
+        if not auction:
+            print(f"[DUTCH AUCTION] Error: Auction with slug {slug} not found")
+            abort(404, description="Auction not found.")
         
-        # Get auction details for the notification
-        auction_data = auction.to_json()
-        
-        # Create a more detailed event specifically for the winner
-        won_event_data = {
-            'auction_id': auction.get_id(),
-            'auction_slug': auction.slug,  # Add slug for easier lookup
-            'winner_id': current_user.get_id(),
-            'final_price': sale_price,
-            'auction': auction_data
-        }
-        
-        # Publish the auction_won event
-        redis_client.publish('auction_won', json.dumps(won_event_data))
-        print(f"Published direct auction_won event for Dutch auction: {won_event_data}")
-    except Exception as e:
-        print(f"Error publishing auction_won event: {e}")
+        if not auction.is_active:
+            print(f"[DUTCH AUCTION] Error: Auction {slug} is no longer active")
+            return jsonify({"error": "Auction is no longer active."}), 400
 
-    return jsonify({"status": "success", "payment_url": "----"}), 200
+        # Mark the auction as inactive and update the timestamp
+        print(f"[DUTCH AUCTION] Marking auction {slug} as inactive")
+        auction.is_active = False
+        auction.date_updated = datetime.utcnow()
+        auction.save()
+
+        sale_price = auction.item.price
+        print(f"[DUTCH AUCTION] Sale price for auction {slug}: ${sale_price}")
+
+        # Create a Bid object (similar to forward auction)
+        print(f"[DUTCH AUCTION] Creating bid record for user {current_user.username} on auction {slug}")
+        bid = Bid(
+            user=current_user,
+            event_type=EventType.BID,
+            time=datetime.utcnow(),
+            price=sale_price,
+            auction=auction,
+        )
+        bid.save()
+        auction.bids.append(bid)
+
+        # Link the bid to the auction
+        auction.event = bid
+        auction.save()
+        print(f"[DUTCH AUCTION] Successfully completed Dutch auction {slug}")
+
+        # We're skipping notifications for Dutch auctions as they go directly to the auction-ended page
+        # Return successful response
+        return jsonify({
+            "status": "success", 
+            "message": "Dutch auction completed successfully", 
+            "auction_id": auction.get_id(),
+            "auction_slug": auction.slug,
+            "final_price": sale_price
+        }), 200
+    except Exception as e:
+        print(f"[DUTCH AUCTION] Error processing Buy Now for auction {slug}: {str(e)}")
+        return jsonify({"error": f"Failed to process purchase: {str(e)}"}), 500
 
 
 @bidding.route("/dutch", methods=["GET"])

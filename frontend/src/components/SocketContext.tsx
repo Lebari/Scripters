@@ -48,17 +48,63 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   useEffect(() => {
     console.log('Initializing global socket connection');
     
-    // Create socket connection
+    // Create socket connection with better configuration
     const newSocket = io('http://localhost:5000', {
-      transports: ['websocket'],
+      transports: ['websocket', 'polling'],  // Try websocket first, fall back to polling if needed
+      reconnectionAttempts: 10,             // Try to reconnect 10 times
+      reconnectionDelay: 1000,              // Start with a 1-second delay
+      reconnectionDelayMax: 5000,           // Maximum 5-second delay
+      timeout: 20000,                       // 20-second timeout
+      autoConnect: true,                    // Connect automatically
     });
 
     newSocket.on('connect', () => {
-      console.log('Global socket connected:', newSocket.id);
+      console.log('⚡ Socket connected successfully:', newSocket.id);
+      
+      // Send a test message to verify two-way communication
+      newSocket.emit('test_connection', { client: 'frontend', timestamp: Date.now() }, (response: any) => {
+        console.log('Server acknowledged test connection:', response);
+      });
     });
 
     newSocket.on('connect_error', (error) => {
-      console.error('Global socket connection error:', error);
+      console.error('❌ Socket connection error:', error.message);
+    });
+    
+    newSocket.on('disconnect', (reason) => {
+      console.log('🔌 Socket disconnected:', reason);
+      if (reason === 'io server disconnect') {
+        // The server has forcefully disconnected the socket
+        console.log('Attempting to reconnect...');
+        newSocket.connect();
+      }
+    });
+    
+    newSocket.on('reconnect', (attemptNumber) => {
+      console.log(`🔄 Socket reconnected after ${attemptNumber} attempts`);
+    });
+    
+    newSocket.on('reconnect_attempt', (attemptNumber) => {
+      console.log(`🔄 Socket reconnection attempt #${attemptNumber}`);
+    });
+    
+    newSocket.on('reconnect_error', (error) => {
+      console.error('❌ Socket reconnection error:', error);
+    });
+    
+    newSocket.on('reconnect_failed', () => {
+      console.error('❌ Socket failed to reconnect after all attempts');
+      
+      // After all automatic reconnect attempts have failed, 
+      // try one more time after a delay
+      setTimeout(() => {
+        console.log('🔄 Manual reconnection attempt...');
+        newSocket.connect();
+      }, 10000);
+    });
+    
+    newSocket.io.on('error', (error) => {
+      console.error('❌ Socket.IO error:', error);
     });
 
     // Set the socket in state
@@ -71,6 +117,25 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     };
   }, []);
 
+  // Add a heartbeat effect to detect connection issues
+  useEffect(() => {
+    if (!socket) return;
+    
+    // Set up a heartbeat interval to verify the connection is still alive
+    const heartbeatInterval = setInterval(() => {
+      if (socket.connected) {
+        console.log('💓 Socket heartbeat: connected');
+      } else {
+        console.warn('💔 Socket heartbeat: disconnected, attempting to reconnect');
+        socket.connect();
+      }
+    }, 30000); // Check every 30 seconds
+    
+    return () => {
+      clearInterval(heartbeatInterval);
+    };
+  }, [socket]);
+
   // Set up event listeners for auction events
   useEffect(() => {
     if (!socket) {
@@ -82,7 +147,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
 
     // Listen for auction expired events
     socket.on('auction_expired', (data: any) => {
-      console.log('AUCTION EXPIRED EVENT RECEIVED! Full data:', JSON.stringify(data));
+      console.log('🏁 AUCTION EXPIRED EVENT RECEIVED! Full data:', JSON.stringify(data));
       console.log('Current user information:', user ? `ID: ${user.id}, Username: ${user.username}` : 'Not logged in');
       console.log('Winner information from event:', data.winner);
       
@@ -97,12 +162,21 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       // Try both direct comparison and string comparison since IDs might be different types
       const isWinner = user?.id === data.winner || String(user?.id) === String(data.winner);
       
-      if (user && data.winner && isWinner) {
-        console.log('CURRENT USER IS THE WINNER! Showing notification...');
+      // During development, show notifications to all users for testing
+      const shouldShowNotification = isWinner || import.meta.env.DEV;
+      
+      if (shouldShowNotification) {
+        if (isWinner) {
+          console.log('🎉 CURRENT USER IS THE WINNER! Showing notification...');
+        } else {
+          console.log('🧪 TEST MODE: Showing notification to non-winner for debugging');
+        }
         
         // Check if we've already processed a notification for this auction
-        if (hasProcessedNotification(data.auction_id, 'expired')) {
+        if (data.auction_id && hasProcessedNotification(data.auction_id, 'expired')) {
           return;
+        } else if (!data.auction_id) {
+          console.warn('⚠️ Missing auction_id in expired event, cannot deduplicate');
         }
         
         // Fetch auction details using slug instead of ID
@@ -156,25 +230,12 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
               price: 0
             }, 0);
           });
-      } else if (data.winner) {
-        // Not the winner, but show notification for testing
-        console.log('USER IS NOT THE WINNER. Winner ID:', data.winner);
-        
-        // For testing only - show a notification to everyone so we can verify the system works
-        if (import.meta.env.DEV) {
-          console.log('TEST MODE: Showing test notification to non-winner for debugging');
-          notifyAuctionWon({
-            id: data.auction_id,
-            name: "TEST NOTIFICATION - You would not normally see this",
-            price: 0
-          }, 0);
-        }
       }
     });
 
     // Also listen for direct auction won events
     socket.on('auction_won', (data: any) => {
-      console.log('AUCTION WON EVENT RECEIVED!', data);
+      console.log('🏆 AUCTION WON EVENT RECEIVED!', data);
       console.log('DIRECT WIN COMPARISON:', {
         'user_id': user?.id,
         'data_winner_id': data.winner_id,

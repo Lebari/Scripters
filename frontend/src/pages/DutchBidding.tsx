@@ -58,9 +58,11 @@ function DutchBidding() {
 
   const handleBuyNow = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("🔵 [DUTCH AUCTION] Buy Now button clicked");
 
     // Check if user is logged in
     if (!token) {
+      console.log("🔵 [DUTCH AUCTION] Error: User not logged in");
       setError("You must be logged in to purchase this item");
       return;
     }
@@ -68,9 +70,9 @@ function DutchBidding() {
     // For Dutch auctions, we need to use the raw.slug property if available
     const auctionSlug = auctionData.raw?.slug || auctionData.slug || auctionData.id;
     
-    console.log("Sending buy now request for auction slug:", auctionSlug);
-    console.log("Current price:", currentPrice);
-    console.log("Authorization token:", token);
+    console.log(`🔵 [DUTCH AUCTION] Processing Buy Now for auction slug: ${auctionSlug}`);
+    console.log(`🔵 [DUTCH AUCTION] Current price: ${currentPrice}`);
+    console.log(`🔵 [DUTCH AUCTION] User: ${user?.username || 'Unknown'}`);
     
     axios
       .post(
@@ -83,25 +85,28 @@ function DutchBidding() {
         }
       )
       .then((response) => {
-        console.log("Buy now response:", response.data);
+        console.log("🔵 [DUTCH AUCTION] Buy Now response:", response.data);
         if (response.data.status === "success") {
-          // Show notification across the app
-          notifyAuctionWon(auctionData, currentPrice);
-          
-          // Set a message for the current page as well
-          setMessage("Congratulations! You've successfully purchased this item.");
-          setError("");
+          console.log(`🔵 [DUTCH AUCTION] Successfully completed. Redirecting to auction-ended page`);
+          // Direct navigation to auction-ended page instead of showing notification
+          navigate("/auction-ended", {
+            state: {
+              auction: auctionData,
+              isWinner: true,
+              finalPrice: currentPrice,
+              user: user
+            }
+          });
         } else {
+          console.log(`🔵 [DUTCH AUCTION] Error in response: ${response.data.error || 'Unknown error'}`);
           setError("Failed to process purchase.");
           setMessage("");
         }
       })
       .catch((err) => {
-        console.error("Buy now error:", err);
+        console.error("🔵 [DUTCH AUCTION] Buy now error:", err);
         if (err.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
-          console.error("Error response data:", err.response.data);
+          console.error("🔵 [DUTCH AUCTION] Error response data:", err.response.data);
           setError(err.response.data.error || `Error: ${err.response.status}`);
         } else {
           setError("Error: " + err.message);
