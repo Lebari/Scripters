@@ -24,14 +24,17 @@ def bid_forward(slug):
         return jsonify({"error": "Missing price in request payload."}), 400
     bid_price = data["price"]
 
-    print(auction.event)
+    print(f"PRICE DEBUG - New bid being placed by {user.username} on auction {slug}: ${bid_price}")
+    print(f"PRICE DEBUG - Current auction.event: {auction.event}")
+    if auction.event:
+        print(f"PRICE DEBUG - Current highest bid price: {auction.event.price}")
+
     if(not auction.event is None and bid_price <= auction.event.price):
         return jsonify({"error": "New bid must be higher than the old bid."}), 400
 
     # Mark the auction as inactive and update the timestamp
     auction.date_updated = datetime.utcnow()
     auction.save()
-
 
     # Create a new Sale object.
     bid = Bid(
@@ -45,8 +48,18 @@ def bid_forward(slug):
     auction.bids.append(bid)
 
     # Link the sale to the auction.
+    print(f"PRICE DEBUG - Setting auction.event to the new bid with price: ${bid_price}")
     auction.event = bid
     auction.save()
+
+    # Print all bids for this auction for debugging
+    print(f"PRICE DEBUG - All bids for auction {slug}:")
+    for i, auction_bid in enumerate(auction.bids):
+        try:
+            bidder_name = auction_bid.user.username if hasattr(auction_bid.user, 'username') else 'unknown'
+            print(f"PRICE DEBUG - Bid #{i+1}: price={auction_bid.price}, user={bidder_name}")
+        except Exception as bid_err:
+            print(f"PRICE DEBUG - Error accessing bid details: {bid_err}")
 
     return jsonify({"status": "success", "payment_url": "----"}), 200
 

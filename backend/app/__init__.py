@@ -79,26 +79,41 @@ def create_app():
                     winner_id = auction.event.user.get_id()
                     final_price = auction.event.price
                     logging.info(f"Auction winner is user ID: {winner_id}")
+                    
+                    # Add detailed price logging
+                    logging.info(f"PRICE DEBUG - Final price from auction.event.price: {final_price}")
+                    logging.info(f"PRICE DEBUG - Auction event object: {auction.event}")
+                    logging.info(f"PRICE DEBUG - Auction event type: {type(auction.event)}")
+                    
+                    # Check if we can get the username of the winner for debugging
+                    winner_username = auction.event.user.username if hasattr(auction.event.user, 'username') else 'unknown'
+                    logging.info(f"PRICE DEBUG - Winner username: {winner_username}")
+                    
+                    # If there are bids, print them all for debugging
+                    if auction.bids:
+                        logging.info(f"PRICE DEBUG - All bids for auction {auction.slug}:")
+                        for i, bid in enumerate(auction.bids):
+                            try:
+                                bidder_name = bid.user.username if hasattr(bid.user, 'username') else 'unknown'
+                                logging.info(f"PRICE DEBUG - Bid #{i+1}: price={bid.price}, user={bidder_name}, time={bid.time}")
+                            except Exception as bid_err:
+                                logging.error(f"PRICE DEBUG - Error accessing bid details: {bid_err}")
                 else:
                     logging.info(f"No winner for auction {auction.slug}")
                 
                 try:
-                    # Create expired auction event data
-                    expired_event_data = {
-                        'auction_id': auction.get_id(),
-                        'auction_slug': auction.slug,  # Add slug for easier lookup
-                        'expired_at': expiration_time.timestamp(),
-                        'winner': winner_id
-                    }
-                    
-                    # Publish the expired auction event
-                    redis_client.publish('auction_expired', json.dumps(expired_event_data))
-                    logging.info(f"Published expired auction event: {expired_event_data}")
-                    
-                    # If there's a winner, also publish a direct auction_won event
+                    # If there's a winner, publish direct auction_won event only
+                    # Otherwise publish general auction_expired event
                     if winner_id:
                         # Get auction details for the notification
                         auction_data = auction.to_json()
+                        
+                        # Ensure all datetime objects are serialized to strings
+                        if 'date_added' in auction_data and auction_data['date_added']:
+                            auction_data['date_added'] = auction_data['date_added'].isoformat() if hasattr(auction_data['date_added'], 'isoformat') else str(auction_data['date_added'])
+                        
+                        if 'date_updated' in auction_data and auction_data['date_updated']:
+                            auction_data['date_updated'] = auction_data['date_updated'].isoformat() if hasattr(auction_data['date_updated'], 'isoformat') else str(auction_data['date_updated'])
                         
                         # Create a more detailed event specifically for the winner
                         won_event_data = {
@@ -106,13 +121,34 @@ def create_app():
                             'auction_slug': auction.slug,  # Add slug for easier lookup
                             'winner_id': winner_id,
                             'final_price': final_price,
+                            'expired_at': expiration_time.timestamp(),
                             'auction': auction_data
                         }
+                        
+                        # Log price information being sent to frontend
+                        logging.info(f"PRICE DEBUG - Sending price to frontend: {final_price}")
+                        if 'event' in auction_data and auction_data['event']:
+                            logging.info(f"PRICE DEBUG - auction_data['event']: {auction_data['event']}")
+                        
+                        # Check if the price info is in the auction_data
+                        if 'item' in auction_data and auction_data['item']:
+                            logging.info(f"PRICE DEBUG - Item price in auction_data: {auction_data['item'].get('price')}")
                         
                         # Publish the auction_won event
                         redis_client.publish('auction_won', json.dumps(won_event_data))
                         logging.info(f"Published direct auction_won event for winner {winner_id}: {won_event_data}")
-                    
+                    else:
+                        # Only publish the expired event if there's no winner
+                        expired_event_data = {
+                            'auction_id': auction.get_id(),
+                            'auction_slug': auction.slug,  # Add slug for easier lookup
+                            'expired_at': expiration_time.timestamp(),
+                            'winner': winner_id
+                        }
+                        
+                        # Publish the expired auction event
+                        redis_client.publish('auction_expired', json.dumps(expired_event_data))
+                        logging.info(f"Published expired auction event: {expired_event_data}")
                 except Exception as e:
                     logging.error(f"Error publishing auction events for {auction.get_id()}: {e}")
             else:
@@ -122,6 +158,9 @@ def create_app():
 
     def redis_listener():
         pubsub = redis_client.pubsub()
+        # Track processed events to prevent duplicates
+        processed_events = set()
+        
         try:
             # Subscribe to multiple channels
             pubsub.subscribe('auction_expired', 'auction_price_changed', 'auction_won')
@@ -129,6 +168,26 @@ def create_app():
                 if message['type'] == 'message':
                     try:
                         data = json.loads(message['data'])
+                        
+                        # Create a unique event identifier using auction_id/slug and event type
+                        event_id = None
+                        if 'auction_id' in data:
+                            event_id = f"{data['auction_id']}_{message['channel']}"
+                        elif 'auction_slug' in data:
+                            event_id = f"{data['auction_slug']}_{message['channel']}"
+                        
+                        # Skip if we've already processed this event
+                        if event_id and event_id in processed_events:
+                            logging.info(f"Skipping duplicate event: {event_id}")
+                            continue
+                            
+                        # Add to processed events if we have an identifier
+                        if event_id:
+                            processed_events.add(event_id)
+                            # Limit set size to prevent memory issues
+                            if len(processed_events) > 1000:
+                                processed_events.clear()
+                        
                         # Check which channel the message came from and emit accordingly
                         if message['channel'] == 'auction_expired':
                             socketio.emit('auction_expired', data)

@@ -124,6 +124,9 @@ class Event(Document):
 
     def get_id(self):
         return str(self.id)
+    
+    def get_price(self):
+        return self.price
 
     def to_json(self):
         model_json = self.to_mongo().to_dict()
@@ -200,6 +203,13 @@ class Auction(Document):
         model_json["event"] = self.event.get_id() if self.event else None
         model_json["broker"] = self.broker.get_id() if self.broker else None
         model_json["bids"] = [bid.get_id() for bid in self.bids if bid]
+
+        # Convert datetime objects to ISO format strings
+        if 'date_added' in model_json and model_json['date_added']:
+            model_json['date_added'] = model_json['date_added'].isoformat()
+        
+        if 'date_updated' in model_json and model_json['date_updated']:
+            model_json['date_updated'] = model_json['date_updated'].isoformat()
 
         model_json["id"] = str(model_json["_id"])
         del model_json["_id"]

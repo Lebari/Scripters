@@ -29,7 +29,38 @@ def get_auction(slug):
     if auction is None:
         return jsonify({"error": "Auction not found"}), 404
 
+    # Add detailed price logging
+    print(f"PRICE DEBUG - Auction {slug} details:")
+    print(f"PRICE DEBUG - Auction type: {auction.auction_type}")
+    print(f"PRICE DEBUG - Item price: {auction.item.price if auction.item else 'No item'}")
+    
+    # Print event (highest bid) information
+    if auction.event:
+        print(f"PRICE DEBUG - Auction event price: {auction.event.price}")
+        print(f"PRICE DEBUG - Auction event user: {auction.event.user.username if hasattr(auction.event.user, 'username') else 'unknown'}")
+    else:
+        print("PRICE DEBUG - No auction event (no bids)")
+        
+    # Print all bids for detailed debugging
+    if auction.bids:
+        print(f"PRICE DEBUG - All bids for auction {slug}:")
+        for i, bid in enumerate(auction.bids):
+            try:
+                bidder_name = bid.user.username if hasattr(bid.user, 'username') else 'unknown'
+                print(f"PRICE DEBUG - Bid #{i+1}: price={bid.price}, user={bidder_name}, time={bid.time}")
+            except Exception as bid_err:
+                print(f"PRICE DEBUG - Error accessing bid details: {bid_err}")
+    else:
+        print("PRICE DEBUG - No bids for this auction")
+
     auction_json = auction.to_json()
+    
+    # Debug the JSON response
+    if 'event' in auction_json and auction_json['event']:
+        print(f"PRICE DEBUG - Event in JSON response: {auction_json['event']}")
+    if 'item' in auction_json and auction_json['item']:
+        print(f"PRICE DEBUG - Item price in JSON response: {auction_json['item'].get('price')}")
+    
     return jsonify({"auction": auction_json}), 200
 
 
