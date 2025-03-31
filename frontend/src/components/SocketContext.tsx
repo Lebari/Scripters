@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useTokenContext } from './TokenContext';
 import { useNotificationHelpers } from './NotificationContext';
@@ -21,6 +21,28 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const { user, token } = useTokenContext();
   const { notifyAuctionWon } = useNotificationHelpers();
+  
+  // Track processed notification events to prevent duplicates
+  const processedNotifications = useRef<Set<string>>(new Set());
+  
+  // Helper function to check if we've already processed this notification
+  const hasProcessedNotification = (auctionId: string, eventType: string): boolean => {
+    const eventKey = `${auctionId}_${eventType}`;
+    if (processedNotifications.current.has(eventKey)) {
+      console.log(`Skipping duplicate notification: ${eventKey}`);
+      return true;
+    }
+    
+    // Add to processed notifications
+    processedNotifications.current.add(eventKey);
+    
+    // Limit set size to prevent memory issues
+    if (processedNotifications.current.size > 100) {
+      processedNotifications.current = new Set();
+    }
+    
+    return false;
+  };
 
   // Initialize socket connection
   useEffect(() => {
@@ -77,6 +99,11 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       
       if (user && data.winner && isWinner) {
         console.log('CURRENT USER IS THE WINNER! Showing notification...');
+        
+        // Check if we've already processed a notification for this auction
+        if (hasProcessedNotification(data.auction_id, 'expired')) {
+          return;
+        }
         
         // Fetch auction details using slug instead of ID
         const auctionSlug = data.auction_slug;
@@ -161,6 +188,11 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
         
       if (isWinner) {
         console.log('DIRECT WIN EVENT - This user is the winner!');
+        
+        // Check if we've already processed a notification for this auction
+        if (hasProcessedNotification(data.auction_id, 'won')) {
+          return;
+        }
         
         // If the event includes the full auction data, use it directly
         if (data.auction) {

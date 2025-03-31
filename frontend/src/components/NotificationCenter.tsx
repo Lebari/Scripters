@@ -74,6 +74,11 @@ const NotificationItem: React.FC<{
             </button>
           </div>
           <div className="mt-1 text-xs text-gray-700">{message}</div>
+          {notification.actionData?.auction?.slug && (
+            <div className="mt-1 text-xs text-gray-500 italic">
+              Auction Slug: {notification.actionData.auction.slug}
+            </div>
+          )}
           {actionText && (
             <div className="mt-3">
               <button

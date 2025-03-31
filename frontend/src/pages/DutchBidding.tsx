@@ -122,6 +122,9 @@ function DutchBidding() {
   return (
     <div className="bidding-container">
       <h2 className="bidding-heading">Dutch Auction Purchase</h2>
+      <p style={{ color: '#fff', marginBottom: '20px', fontSize: '0.9rem', textAlign: 'center' }}>
+        Auction Slug: {auctionData?.slug || auctionData?.raw?.slug || auctionData?.id || "Not available"}
+      </p>
       <div className="bidding-card">
         <h3 className="bidding-item-name">{auctionData.name || (auctionData.raw?.item?.name) || "Unnamed Item"}</h3>
         <p className="bidding-current-bid">

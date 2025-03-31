@@ -119,7 +119,7 @@ export const useNotificationHelpers = () => {
       name: auctionData.name || auctionData.item?.name || "Unknown Item",
       price: finalPrice || auctionData.price || 0,
       auction_type: auctionData.auction_type || auctionData.auctionType || "Unknown",
-      slug: auctionData.slug || auctionData.id
+      slug: auctionData.slug || auctionData.raw?.slug || auctionData.id
     };
     
     console.log('Normalized auction data for notification:', normalizedAuction);
