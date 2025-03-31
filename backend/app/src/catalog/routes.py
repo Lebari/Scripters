@@ -24,12 +24,13 @@ def get_all_auctions():
 def get_auction(slug):
     print("Hello from get_auction!")
     # return auction with specified slug
-    auction = Auction.objects(slug=slug).first().to_json()
+    auction = Auction.objects(slug=slug).first()
 
     if auction is None:
-        return jsonify({"error": "Invalid slug"}), 400
+        return jsonify({"error": "Auction not found"}), 404
 
-    return jsonify({"auction": auction}), 201
+    auction_json = auction.to_json()
+    return jsonify({"auction": auction_json}), 200
 
 
 @catalog.route("/upload", methods=["POST"])
@@ -49,6 +50,7 @@ def upload_auction():
         )
         new_item.save()
 
+        current_time = datetime.utcnow()  # Use UTC time consistently
         # create auction
         new_auction = Auction(
             item = new_item,
@@ -57,7 +59,8 @@ def upload_auction():
             duration = data["duration"],
             seller = current_user,
             is_active = True,
-            date_added = datetime.now()
+            date_added = current_time,
+            date_updated = current_time
         )
         new_auction.save()
 

@@ -88,3 +88,48 @@
     margin-top: 0.5rem;
   }
   
+  /* Auction Ended Page Styles */
+  .auction-success-message {
+    background-color: #e6f7e6;
+    border-left: 4px solid #4caf50;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 0 4px 4px 0;
+  }
+  
+  .auction-success-message p {
+    color: #2e7031;
+    font-weight: 500;
+    margin: 0;
+  }
+  
+  .auction-ended-message {
+    background-color: #f8e6e6;
+    border-left: 4px solid #d00;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 0 4px 4px 0;
+  }
+  
+  .auction-ended-message p {
+    margin: 0;
+  }
+  
+  .auction-details {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+  }
+  
+  .auction-details p {
+    margin: 0.5rem 0;
+    color: #333;
+  }
+  
+  .auction-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  

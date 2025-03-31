@@ -3,6 +3,7 @@ from flask import jsonify, abort, request
 from ...models import *
 from backend.database import *
 from flask_login import current_user, login_required
+from bson import ObjectId
 
 
 @search.route("/", methods=["GET"])
@@ -40,3 +41,26 @@ def search_items():
     results = [auction.to_json() for auction in auctions]
     
     return jsonify({"status": "success", "results": results}), 200
+
+@search.route("/by-id/<auction_id>", methods=["GET"])
+def get_auction_by_id(auction_id):
+    """
+    Get auction details by ID
+    This is specifically used by the notification system to retrieve auction details
+    """
+    try:
+        # Try to convert the string ID to a MongoDB ObjectId
+        object_id = ObjectId(auction_id)
+        
+        # Retrieve the auction using its ID
+        auction = Auction.objects(id=object_id).first()
+        
+        if not auction:
+            return jsonify({"error": "Auction not found"}), 404
+            
+        # Return the auction details
+        auction_data = auction.to_json()
+        return jsonify({"status": "success", "auction": auction_data}), 200
+    except Exception as e:
+        # In case of error (invalid ID format, etc.)
+        return jsonify({"error": str(e)}), 400

@@ -2,10 +2,10 @@
 .auction-search-display-container {
   max-width: 800px;
   margin: 2rem auto;
-  background: #fff;
+  background: #FFFFF0; /* offwhite from tailwind config */
   padding: 2rem;
   border-radius: 10px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 16px rgba(67, 41, 31, 0.1); /* brown with opacity */
 }
 
 /* Heading */
@@ -13,7 +13,7 @@
   text-align: center;
   font-size: 2rem;
   margin-bottom: 1.5rem;
-  color: #333;
+  color: #43291F; /* brown from tailwind config */
 }
 
 /* Form styling using grid */
@@ -30,21 +30,37 @@
   flex-direction: column;
 }
 
+/* Form labels */
+.auction-search-display-form label {
+  margin-bottom: 0.3rem;
+  font-weight: 500;
+  color: #43291F; /* brown from tailwind config */
+}
+
 /* Input & select styling */
 .auction-search-display-input,
 .auction-search-display-select {
   padding: 0.75rem;
-  border: 1px solid #ccc;
+  border: 1px solid #BDCFBC; /* green_offwhite from tailwind config */
   border-radius: 5px;
   font-size: 1rem;
+  background-color: #FFFFF0; /* offwhite from tailwind config */
+  color: #43291F; /* brown from tailwind config */
+}
+
+.auction-search-display-input:focus,
+.auction-search-display-select:focus {
+  border-color: #87C38F; /* green_light from tailwind config */
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(134, 195, 143, 0.2); /* green_light with opacity */
 }
 
 /* Full-width button spans two columns */
 .auction-search-display-button {
   grid-column: span 2;
   padding: 0.75rem;
-  background-color: #4caf50;
-  color: #fff;
+  background-color: #226F54; /* green from tailwind config */
+  color: #FFFFF0; /* offwhite from tailwind config */
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -54,43 +70,71 @@
 }
 
 .auction-search-display-button:hover {
-  background-color: #43a047;
+  background-color: #1a5b43; /* darker green */
 }
 
 .auction-search-display-button:disabled {
-  background-color: #ccc;
+  background-color: #C9C8BC; /* offwhite_grey from tailwind config */
   cursor: not-allowed;
+}
+
+/* Table container */
+.table-container {
+  margin-top: 1rem;
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(67, 41, 31, 0.1); /* brown with opacity */
 }
 
 /* Table styling */
 .auction-search-display-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 1rem;
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid #ddd;
 }
 
 .auction-search-display-table th,
 .auction-search-display-table td {
   padding: 1rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #999; /* Darker border for better visibility */
   text-align: left;
+  color: #000000; /* Explicitly black text for all table content */
 }
 
 .auction-search-display-table th {
-  background-color: #f7f7f7;
+  background-color: #226F54; /* green from tailwind config */
+  color: #FFFFFF; /* Pure white for best contrast */
   font-weight: bold;
   font-size: 1rem;
 }
 
+.auction-search-display-table tbody tr:nth-child(even) {
+  background-color: #FFFFFF; /* Pure white background */
+}
+
+.auction-search-display-table tbody tr:nth-child(odd) {
+  background-color: #F0F0F0; /* Light gray for subtle alternating rows */
+}
+
 .auction-search-display-table tbody tr:hover {
-  background-color: #f1f1f1;
+  background-color: #E0E0E0; /* Darker gray on hover */
+  cursor: pointer;
+}
+
+/* Selected row styling */
+.auction-search-display-table tr.selected-row {
+  background-color: #226F54 !important; /* Green from tailwind config */
+  color: #FFFFFF !important; /* White text for contrast */
+  font-weight: 500;
 }
 
 /* Empty state text */
 .auction-search-display-empty {
   text-align: center;
   font-size: 1.1rem;
-  color: #888;
+  color: #43291F; /* brown from tailwind config */
   margin-top: 1rem;
 }
 
@@ -98,4 +142,12 @@
 .auction-search-display-footer {
   text-align: right;
   margin-top: 1rem;
+}
+
+/* Radio button styling */
+.auction-search-display-table input[type="radio"] {
+  cursor: pointer;
+  accent-color: #226F54; /* green from tailwind config */
+  width: 16px;
+  height: 16px;
 }
