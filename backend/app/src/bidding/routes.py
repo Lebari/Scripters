@@ -22,12 +22,14 @@ def bid_forward(slug):
     data = request.get_json()
     if not data or "price" not in data:
         return jsonify({"error": "Missing price in request payload."}), 400
-    bid_price = data["price"]
-
-    print(f"PRICE DEBUG - New bid being placed by {user.username} on auction {slug}: ${bid_price}")
-    print(f"PRICE DEBUG - Current auction.event: {auction.event}")
-    if auction.event:
-        print(f"PRICE DEBUG - Current highest bid price: {auction.event.price}")
+    
+    # Get the bid price and ensure it's an integer
+    try:
+        bid_price = int(data["price"])
+        if bid_price != float(data["price"]):
+            return jsonify({"error": "Bid price must be a whole number (integer)."}), 400
+    except (ValueError, TypeError):
+        return jsonify({"error": "Bid price must be a valid number."}), 400
 
     if(not auction.event is None and bid_price <= auction.event.price):
         return jsonify({"error": "New bid must be higher than the old bid."}), 400
@@ -48,18 +50,8 @@ def bid_forward(slug):
     auction.bids.append(bid)
 
     # Link the sale to the auction.
-    print(f"PRICE DEBUG - Setting auction.event to the new bid with price: ${bid_price}")
     auction.event = bid
     auction.save()
-
-    # Print all bids for this auction for debugging
-    print(f"PRICE DEBUG - All bids for auction {slug}:")
-    for i, auction_bid in enumerate(auction.bids):
-        try:
-            bidder_name = auction_bid.user.username if hasattr(auction_bid.user, 'username') else 'unknown'
-            print(f"PRICE DEBUG - Bid #{i+1}: price={auction_bid.price}, user={bidder_name}")
-        except Exception as bid_err:
-            print(f"PRICE DEBUG - Error accessing bid details: {bid_err}")
 
     return jsonify({"status": "success", "payment_url": "----"}), 200
 

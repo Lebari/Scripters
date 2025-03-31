@@ -122,9 +122,15 @@ function ForwardBidding() {
     // Parse the bid price to a number
     const numericBidPrice = Number(bidPrice);
 
+    // Check if the bid is a whole number (integer)
+    if (!Number.isInteger(numericBidPrice)) {
+      setError("Bid amount must be a whole number");
+      return;
+    }
+
     // Check if the bid is higher than the current highest bid
     if (numericBidPrice <= currentHighestBid) {
-      setError(`Your bid must be higher than ${currentHighestBid}`);
+      setError(`Your bid must be higher than ${Math.floor(currentHighestBid)}`);
       return;
     }
 
@@ -209,7 +215,7 @@ function ForwardBidding() {
       <div className="bidding-card">
         <h3 className="bidding-item-name">{auction.name || auction.raw?.item?.name}</h3>
         <p className="bidding-current-bid">
-          <strong>Current Highest Bid:</strong> ${currentHighestBid.toFixed(2)}
+          <strong>Current Highest Bid:</strong> ${Math.floor(currentHighestBid)}
         </p>
 
         {!token ? (
@@ -233,9 +239,9 @@ function ForwardBidding() {
                 name="bidPrice"
                 value={bidPrice}
                 onChange={(e) => setBidPrice(e.target.value)}
-                min={currentHighestBid + 0.01}
-                step="0.01"
-                placeholder={`More than $${currentHighestBid.toFixed(2)}`}
+                min={Math.floor(currentHighestBid) + 1}
+                step="1"
+                placeholder={`More than $${Math.floor(currentHighestBid)}`}
                 className="bidding-input"
               />
             </div>

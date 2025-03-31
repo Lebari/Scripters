@@ -79,25 +79,6 @@ def create_app():
                     winner_id = auction.event.user.get_id()
                     final_price = auction.event.price
                     logging.info(f"Auction winner is user ID: {winner_id}")
-                    
-                    # Add detailed price logging
-                    logging.info(f"PRICE DEBUG - Final price from auction.event.price: {final_price}")
-                    logging.info(f"PRICE DEBUG - Auction event object: {auction.event}")
-                    logging.info(f"PRICE DEBUG - Auction event type: {type(auction.event)}")
-                    
-                    # Check if we can get the username of the winner for debugging
-                    winner_username = auction.event.user.username if hasattr(auction.event.user, 'username') else 'unknown'
-                    logging.info(f"PRICE DEBUG - Winner username: {winner_username}")
-                    
-                    # If there are bids, print them all for debugging
-                    if auction.bids:
-                        logging.info(f"PRICE DEBUG - All bids for auction {auction.slug}:")
-                        for i, bid in enumerate(auction.bids):
-                            try:
-                                bidder_name = bid.user.username if hasattr(bid.user, 'username') else 'unknown'
-                                logging.info(f"PRICE DEBUG - Bid #{i+1}: price={bid.price}, user={bidder_name}, time={bid.time}")
-                            except Exception as bid_err:
-                                logging.error(f"PRICE DEBUG - Error accessing bid details: {bid_err}")
                 else:
                     logging.info(f"No winner for auction {auction.slug}")
                 
@@ -124,15 +105,6 @@ def create_app():
                             'expired_at': expiration_time.timestamp(),
                             'auction': auction_data
                         }
-                        
-                        # Log price information being sent to frontend
-                        logging.info(f"PRICE DEBUG - Sending price to frontend: {final_price}")
-                        if 'event' in auction_data and auction_data['event']:
-                            logging.info(f"PRICE DEBUG - auction_data['event']: {auction_data['event']}")
-                        
-                        # Check if the price info is in the auction_data
-                        if 'item' in auction_data and auction_data['item']:
-                            logging.info(f"PRICE DEBUG - Item price in auction_data: {auction_data['item'].get('price')}")
                         
                         # Publish the auction_won event
                         redis_client.publish('auction_won', json.dumps(won_event_data))
