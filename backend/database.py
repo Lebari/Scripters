@@ -1,5 +1,13 @@
 from mongoengine import connect
-from .env import *
+import os
+
+# Check if in Docker environment or local environment
+if os.environ.get('PYTHONPATH') == '/app':
+    # In Docker, imports are absolute from /app
+    from env import *
+else:
+    # In local environment, use relative import
+    from .env import *
 
 
 # with mongoengine, the connection is a global singleton that is managed by the library,

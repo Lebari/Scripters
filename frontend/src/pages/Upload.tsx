@@ -17,7 +17,7 @@ const Upload = () => {
     const upload = (event: React.FormEvent) =>{
         console.log(`auction ${signupForm.name} typ ${signupForm.auction_type}`)
         axios({
-            baseURL: "http://localhost:5000",
+            baseURL: "http://localhost:5001",
             url: "catalog/upload",
             method: "post",
             data: {

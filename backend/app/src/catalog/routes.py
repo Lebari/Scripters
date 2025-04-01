@@ -1,9 +1,12 @@
 from . import catalog
+import logging
+import json
 from ..validations import validate_new_auction, seller_required
 from ...models import Auction, Item, AuctionType
-from flask import jsonify, request
+from flask import jsonify, request, current_app
 from datetime import datetime
 from flask_jwt_extended import jwt_required, current_user
+from app import redis_client  # Import redis_client
 
 
 @catalog.route("/", methods=["GET"])
@@ -22,12 +25,13 @@ def get_all_auctions():
 def get_auction(slug):
     print("Hello from get_auction!")
     # return auction with specified slug
-    auction = Auction.objects(slug=slug).first().to_json()
+    auction = Auction.objects(slug=slug).first()
 
     if auction is None:
-        return jsonify({"error": "Invalid slug"}), 400
+        return jsonify({"error": "Auction not found"}), 404
 
-    return jsonify({"auction": auction}), 201
+    auction_json = auction.to_json()
+    return jsonify({"auction": auction_json}), 200
 
 
 @catalog.route("/upload", methods=["POST"])
@@ -47,6 +51,7 @@ def upload_auction():
         )
         new_item.save()
 
+        current_time = datetime.utcnow()  # Use UTC time consistently
         # create auction
         new_auction = Auction(
             item = new_item,
@@ -55,9 +60,14 @@ def upload_auction():
             duration = data["duration"],
             seller = current_user,
             is_active = True,
-            date_added = datetime.now()
+            date_added = current_time,
+            date_updated = current_time
         )
         new_auction.save()
+
+        # Schedule the auction to expire based on its duration
+        current_app.schedule_auction_expiration(new_auction)
+        logging.info(f"Created and scheduled new auction {new_auction.slug} to expire in {new_auction.duration} minutes")
 
         # ensure some user is logged in
         if not current_user:
@@ -87,22 +97,49 @@ def update_dutch_auction(slug):
     try:
         # Retrieve auction from database
         auction = Auction.objects(slug=slug).first()
-        # get price from json
-        new_price = request.json["price"]
+        if not auction:
+            return jsonify({"error": "Auction not found."}), 404
+
+        # Get the new price from JSON request body
+        new_price = request.json.get("price")
+        if new_price is None:
+            return jsonify({"error": "Price is required."}), 400
 
         if new_price < 0:
             return jsonify({"error": "Price must be non-negative."}), 400
+
         if auction.auction_type != AuctionType.DUTCH:
             return jsonify({"error": "Auction must be of type dutch."}), 400
+
         if not auction.is_active:
             return jsonify({"error": "Auction must be active to update."}), 400
+
         if current_user.id != auction.seller.id:
             return jsonify({"error": "User is not auction's seller."}), 400
 
+        # Update the item price
         item = Item.objects(id=auction.item.id).first()
+        if not item:
+            return jsonify({"error": "Item not found."}), 404
+
         item.price = new_price
         item.save()
 
+        # Publish a price update event to Redis for frontend notification
+        event_data = {
+            'auction_id': auction.get_id(),
+            'new_price': new_price,
+            'updated_at': datetime.now().timestamp()
+        }
+        try:
+            redis_client.publish('auction_price_changed', json.dumps(event_data))
+            print("--------------------alsdkhasldhalsdkhaosdhalskd")
+            logging.info(f"Published price update event: {event_data}")
+        except Exception as pub_err:
+            logging.error(f"Error publishing price update event: {pub_err}")
+
         return jsonify({"message": "Auction price updated"}), 201
     except Exception as e:
+        logging.error(f"Error in update_dutch_auction: {e}")
         return jsonify({"error": str(e)}), 400
+

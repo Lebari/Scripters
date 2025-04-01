@@ -47,8 +47,7 @@ class Item(Document):
         }
 
     def to_json(self):
-        print(f"serializing {self.__str__}")
-        self.get_desc()
+        return self.get_desc()
 
 
 class User(UserMixin, Document):
@@ -93,7 +92,6 @@ class User(UserMixin, Document):
         }
 
     def to_json(self):
-        print(f"serializing {self.__str__}")
         model_json = self.to_mongo().to_dict()
 
         model_json["broker"] = self.broker.get_id() if self.broker else None
@@ -126,9 +124,11 @@ class Event(Document):
 
     def get_id(self):
         return str(self.id)
+    
+    def get_price(self):
+        return self.price
 
     def to_json(self):
-        print(f"serializing {self.__str__}")
         model_json = self.to_mongo().to_dict()
 
         model_json["user"] = str(self.user.id)
@@ -143,22 +143,20 @@ class Bid(Event):
         return str(self.id)
 
     def to_json(self):
-        print(f"serializing {self.__str__}")
-        return super.to_json()
+        return super().to_json()
 
 
 class Sale(Event):
     card = ReferenceField('Card', required=True)
 
     def __str__(self):
-        return self.auction.item.name + self.price
+        return self.auction.item.name + str(self.price)
 
     def get_id(self):
         return str(self.id)
 
     def to_json(self):
-        print(f"serializing {self.__str__}")
-        model_json = super.to_json()
+        model_json = super().to_json()
         model_json["card"] = self.card.get_id() if self.card else None
         return model_json
 
@@ -198,8 +196,6 @@ class Auction(Document):
         return str(self.id)
 
     def to_json(self):
-
-        print(f"serializing {self.__str__}")
         model_json = self.to_mongo().to_dict()
         # explicitly serializing reference fields
         model_json["item"] = self.item.get_desc()
@@ -207,6 +203,13 @@ class Auction(Document):
         model_json["event"] = self.event.get_id() if self.event else None
         model_json["broker"] = self.broker.get_id() if self.broker else None
         model_json["bids"] = [bid.get_id() for bid in self.bids if bid]
+
+        # Convert datetime objects to ISO format strings
+        if 'date_added' in model_json and model_json['date_added']:
+            model_json['date_added'] = model_json['date_added'].isoformat()
+        
+        if 'date_updated' in model_json and model_json['date_updated']:
+            model_json['date_updated'] = model_json['date_updated'].isoformat()
 
         model_json["id"] = str(model_json["_id"])
         del model_json["_id"]
@@ -226,7 +229,6 @@ class Card(Document):
         return str(self.id)
 
     def to_json(self):
-        print(f"serializing {self.__str__}")
         model_json = self.to_mongo().to_dict()
         model_json["id"] = str(model_json["_id"])
         del model_json["_id"]

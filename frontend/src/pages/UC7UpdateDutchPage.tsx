@@ -11,7 +11,7 @@ export const MyAuctions = () =>{
 
     const getAllAuctions = () =>{
         axios({
-            baseURL: "http://localhost:5000",
+            baseURL: "http://localhost:5001",
             url: "myauctions",
             method: "get",
         }).then((result) => {

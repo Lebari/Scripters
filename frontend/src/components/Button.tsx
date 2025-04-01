@@ -14,30 +14,60 @@ type Ref = HTMLButtonElement;
 // extend the base button attributes
 interface ButtonProps extends BaseButtonAttributes {
     disabled?: boolean;
-    buttonStyle?: VariantProps<typeof clickedButton |typeof secButton |typeof baseButton | typeof warnButton>;
-    className?:string,
+    buttonStyle?: VariantProps<typeof clickedButton | typeof secButton | typeof baseButton | typeof warnButton>;
+    className?: string;
     buttonVariant?: "clicked" | "sec" | "warn";
+    responsive?: boolean;
+    size?: "xs" | "sm" | "md" | "lg" | "xl";
+    fullWidth?: boolean;
 }
-// default values for Button {isLoading = false, disabled = false, leftIcon = undefined, rightIcon = undefined, buttonStyle = {}, buttonVariant = "clicked"}
 
 const Button = forwardRef<Ref, ButtonProps>((props, ref) => {
     // destructure necessary props
-    const { type, children, onClick,
-        buttonStyle, className,
-        buttonVariant, disabled = false,
-        ...rest } = props;
+    const { 
+        type, 
+        children, 
+        onClick,
+        buttonStyle, 
+        className,
+        buttonVariant, 
+        disabled = false,
+        responsive = false,
+        size,
+        fullWidth = false,
+        ...rest 
+    } = props;
 
-    const renderButtonVariant=()=>{
-        if(buttonVariant==="clicked"){
-            return clickedButton({...buttonStyle,className}); //{...buttonStyle,className}
+    const renderButtonVariant = () => {
+        let styles = {};
+        
+        if (responsive) {
+            styles = { responsive: true };
         }
-        if(buttonVariant==="sec"){
-            return secButton({...buttonStyle,className});
+        
+        if (size) {
+            styles = { ...styles, size };
         }
-        if(buttonVariant==="warn"){
-            return warnButton({...buttonStyle,className});
+        
+        if (fullWidth) {
+            styles = { ...styles, behavior: 'block' };
         }
-        return baseButton({...buttonStyle,className});
+
+        const finalStyles = { ...styles, ...buttonStyle, className };
+
+        if (buttonVariant === "clicked") {
+            return clickedButton(finalStyles);
+        }
+        
+        if (buttonVariant === "sec") {
+            return secButton(finalStyles);
+        }
+        
+        if (buttonVariant === "warn") {
+            return warnButton(finalStyles);
+        }
+        
+        return baseButton(finalStyles);
     }
 
     return (
@@ -46,7 +76,7 @@ const Button = forwardRef<Ref, ButtonProps>((props, ref) => {
                 disabled ? "opacity-50 cursor-not-allowed" : ""
             }`}
             {...rest}
-            type={type ? "submit" : "button"}
+            type={type === "submit" ? "submit" : "button"}
             onClick={onClick}
             disabled={disabled}
             ref={ref}
