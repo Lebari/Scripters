@@ -98,24 +98,25 @@ curl --location --request PATCH 'http://127.0.0.1:5000/remove_seller' \
 
 ## Generate Receipt
 ```
-curl -X POST http://127.0.0.1:5000/receipt \
--H "Content-Type: application/json" \
--d '{
-"purchase_id": "67cf1a30c81816310373af8e"
+curl --location --request POST 'http://127.0.0.1:5000/receipt' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc0MTgzOTQ0MSwianRpIjoiMzc4NTI3OWItN2M0NS00NmRlLWE4YjAtMDRiYzg5ZTQ4YjVkIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImFiZDFAZ21haWwuY29tIiwibmJmIjoxNzQxODM5NDQxLCJjc3JmIjoiMTFlNzg5MDctOTRlZC00MDZjLWJmOWEtZWViOGE2ODgxZDk2IiwiZXhwIjoxNzQxODQ2NjQxfQ.y4EfkvOCWdOwd5S2NJSYNq9Urfu1hwG4ssdJZnSaFgA' \
+--data-raw '{
+    "purchase_id": "67d25ceea6cd19856a6783b0"
 }'
 ```
 
 ## Generate Payment
 ```
-curl -X POST http://127.0.0.1:5000/payment \
--H "Content-Type: application/json" \
--H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
--d '{
-"auction_id": "67cba9d6000720ea7a0c9977",
-"card_number": "4111111111111111",
-"card_name": "John Doe",
-"exp_date": "12/26",
-"security_code": "123",
-"shipping_address": "123 Main Street, New York, NY 10001"
+curl --location --request POST 'http://127.0.0.1:5000/payment' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc0MTgzOTQ0MSwianRpIjoiMzc4NTI3OWItN2M0NS00NmRlLWE4YjAtMDRiYzg5ZTQ4YjVkIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImFiZDFAZ21haWwuY29tIiwibmJmIjoxNzQxODM5NDQxLCJjc3JmIjoiMTFlNzg5MDctOTRlZC00MDZjLWJmOWEtZWViOGE2ODgxZDk2IiwiZXhwIjoxNzQxODQ2NjQxfQ.y4EfkvOCWdOwd5S2NJSYNq9Urfu1hwG4ssdJZnSaFgA' \
+--data-raw '{
+    "auction_id": "67cba9d6000720ea7a0c9977",
+    "card_number": "4111111111111111",
+    "card_name": "Jane Doe",
+    "exp_date": "12/27",
+    "security_code": "123"
 }'
+
 ```
