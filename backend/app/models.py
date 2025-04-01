@@ -63,8 +63,8 @@ class User(UserMixin, Document):
     postal = StringField(required=True)
     broker = ReferenceField('Broker')
     cards = ListField(ReferenceField('Card'))
-    sales = ListField(ReferenceField('Sale'))
-    purchases = ListField(ReferenceField('Sale'))
+    sales = ListField(ReferenceField('Payment'))
+    purchases = ListField(ReferenceField('Payment'))
     subscriptions = ListField(ReferenceField('Broker'))
     auctions = ListField(ReferenceField('Auction'))
 
