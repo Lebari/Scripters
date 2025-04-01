@@ -58,6 +58,7 @@ def process_payment():
 
         return jsonify({
             "message": "Auction is inactive. Payment completed successfully.",
+            "payment_id": str(payment.id),
             "payment": payment.to_json(),
             "user_purchases": [str(p) for p in current_user.purchases]
         })

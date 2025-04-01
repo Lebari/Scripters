@@ -212,17 +212,15 @@ function AuctionEnded() {
       buyer: user?.username || "Guest"
     };
     
-    // Navigate to receipt or confirmation page
-    navigate(`/receipt/${receiptData.id || 'new'}`, { 
-      state: { 
-        receipt: {
-          ...receiptData,
-          totalPrice,
-          expeditedShipping,
-          shippingPrice: shippingPrice + (expeditedShipping ? expeditedShippingPrice : 0)
-        }, 
-        auction: auctionDetails || { name: basicInfo?.itemName || "dd20" }, 
-        user 
+    // Navigate to payment or confirmation page
+    navigate(import.meta.env.VITE_APP_UC5PAY_URL || "/payment", {
+      state: {
+        auction: auctionDetails || auction,
+        finalPrice,
+        expeditedShipping,
+        shippingPrice: shippingPrice + (expeditedShipping ? expeditedShippingPrice : 0),
+        totalPrice: finalPrice + shippingPrice + (expeditedShipping ? expeditedShippingPrice : 0),
+        user
       }
     });
   };

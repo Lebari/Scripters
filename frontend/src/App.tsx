@@ -18,6 +18,8 @@ import UC7UpdateDutchPage from "./pages/UC7UpdateDutchPage.tsx";
 import { NotificationProvider } from "./components/NotificationContext.tsx";
 import NotificationCenter from "./components/NotificationCenter.tsx";
 import { SocketProvider } from "./components/SocketContext.tsx";
+import Payment from "./pages/Payment.tsx";
+import Receipt from "./pages/Receipt.tsx";
 
 function App() {
     const { user, setUser, token } = useTokenContext();
@@ -109,6 +111,8 @@ function App() {
                             <Route path={import.meta.env.VITE_APP_UC32DCHBIDDING_URL} element={<DutchBidding />} />
                             <Route path="/auction-ended" element={<AuctionEnded />} />
                             <Route path={import.meta.env.VITE_APP_UPDATE_URL} element={<UC7UpdateDutchPage />} />
+                            <Route path={import.meta.env.VITE_APP_UC5PAY_URL || "/payment"} element={<Payment />} />
+                            <Route path="/receipt/:id" element={<Receipt />} />
                         </Routes>
                     </div>
 
