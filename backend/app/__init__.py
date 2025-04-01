@@ -3,8 +3,18 @@ import json
 from datetime import datetime, timedelta
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from backend.database import *
-from backend.app.models import *
+import os
+
+# Check if in Docker environment (PYTHONPATH=/app) or local environment
+if os.environ.get('PYTHONPATH') == '/app':
+    # In Docker, imports are relative to /app
+    from database import *
+    from app.models import *
+else:
+    # In local environment with backend prefix
+    from database import *
+    from app.models import *
+
 from flask_jwt_extended import JWTManager
 
 from flask_socketio import SocketIO
@@ -12,9 +22,14 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import redis
 import time
 
+# Get Redis connection details from environment or use defaults
+redis_host = os.environ.get('REDIS_HOST', 'localhost')
+redis_port = int(os.environ.get('REDIS_PORT', 6379))
+
 try:
-    redis_client = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
+    redis_client = redis.StrictRedis(host=redis_host, port=redis_port, db=0, decode_responses=True)
     redis_client.ping()
+    logging.info(f"Successfully connected to Redis at {redis_host}:{redis_port}")
 except redis.RedisError as e:
     logging.error(f"Redis connection error: {e}")
     raise

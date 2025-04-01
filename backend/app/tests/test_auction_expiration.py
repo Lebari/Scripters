@@ -1,8 +1,8 @@
 import unittest
 from datetime import datetime, timedelta
-from backend.app.models import Auction, Item, User, AuctionType
-from backend.app.__init__ import check_expired_auctions, mark_auction_as_expired, schedule_auction_expiration
-from backend.database import init_db
+from app.models import Auction, Item, User, AuctionType
+from app.__init__ import check_expired_auctions, mark_auction_as_expired, schedule_auction_expiration
+from database import init_db
 import logging
 import time
 

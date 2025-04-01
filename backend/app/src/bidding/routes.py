@@ -1,7 +1,7 @@
 from . import bidding
 from flask import jsonify, abort, request
 from ...models import *
-from backend.database import *
+from database import *
 from datetime import datetime
 from flask_jwt_extended import current_user, jwt_required
 import json

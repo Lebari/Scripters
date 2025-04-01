@@ -118,6 +118,8 @@ Run the application
 `bun run dev`
 
 ## Running Instructions
+
+### Standard Setup
 Open two CLI Sessions - one for backend and one for frontend.
 
 Go to backend directory and run:
@@ -128,10 +130,41 @@ Go to frontend directory and run:
 
 `bun run dev`
 
+### Docker Setup
+The application can also be run using Docker containers, which simplifies setup and ensures consistency across different environments.
+
+#### Prerequisites
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+
+#### Running with Docker
+1. Clone the repository and navigate to the project root directory
+2. Start all containers:
+   ```
+   docker compose up -d
+   ```
+3. Access the application:
+   - Frontend: http://localhost:5173
+   - Backend API: http://localhost:5001
+
+#### Docker Commands
+- Start containers: `docker compose up -d`
+- Stop containers: `docker compose down`
+- View logs: `docker compose logs`
+- View specific service logs: `docker compose logs [service]` (e.g., `docker compose logs frontend`)
+- Rebuild containers: `docker compose up -d --build`
+
+#### Container Architecture
+The Docker setup consists of three containers:
+1. **Frontend** (scripters-frontend): React application served by Vite
+2. **Backend** (scripters-backend): Flask API server
+3. **Redis** (scripters-redis): For real-time messaging and event handling
 
 ### Ports
 - Frontend runs on port 5173
-- Backend runs on port 5000
+- Backend runs on port 5001 (when using Docker)
+- Backend runs on port 5000 (when running locally)
+- Redis runs on port 6379
 
 
 ### To contribute:

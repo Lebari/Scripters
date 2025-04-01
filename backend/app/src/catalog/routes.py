@@ -6,7 +6,7 @@ from ...models import Auction, Item, AuctionType
 from flask import jsonify, request, current_app
 from datetime import datetime
 from flask_jwt_extended import jwt_required, current_user
-from backend.app import redis_client  # Import redis_client
+from app import redis_client  # Import redis_client
 
 
 @catalog.route("/", methods=["GET"])

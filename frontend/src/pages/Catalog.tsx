@@ -11,7 +11,7 @@ const Catalog = () => {
     const getAllAuctions = () =>{
         setLoading(true);
         axios({
-            baseURL: "http://localhost:5000",
+            baseURL: "http://localhost:5001",
             url: "catalog/",
             method: "get",
         }).then((result) => {

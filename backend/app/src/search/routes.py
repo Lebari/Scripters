@@ -1,7 +1,7 @@
 from . import search
 from flask import jsonify, abort, request
 from ...models import *
-from backend.database import *
+from database import *
 from flask_login import current_user, login_required
 from bson import ObjectId
 

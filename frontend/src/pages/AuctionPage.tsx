@@ -22,7 +22,7 @@ const AuctionPage: React.FC = () => {
         try {
             // TODO allow for forward bid
             axios({
-                baseURL: "http://localhost:5000",
+                baseURL: "http://localhost:5001",
                 url: `${encodeURIComponent(name)}/dutch-update`,
                 method: "patch",
             }).then(async (result) => {
@@ -53,7 +53,7 @@ const AuctionPage: React.FC = () => {
         if(name){
         try {
             axios({
-                baseURL: "http://localhost:5000",
+                baseURL: "http://localhost:5001",
                 url: `catalog/${encodeURIComponent(name)}/dutch-update`,
                 method: "patch",
                 data:{
@@ -92,7 +92,7 @@ const AuctionPage: React.FC = () => {
 
     const getAuctionCall = (name: string)=>{
         axios({
-            baseURL: "http://localhost:5000",
+            baseURL: "http://localhost:5001",
             url: `catalog/${encodeURIComponent(name)}`,
             method: "get",
         }).then(async (result) => {

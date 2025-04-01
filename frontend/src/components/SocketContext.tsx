@@ -49,7 +49,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     console.log('Initializing global socket connection');
     
     // Create socket connection with better configuration
-    const newSocket = io('http://localhost:5000', {
+    const newSocket = io('http://localhost:5001', {
       transports: ['websocket', 'polling'],  // Try websocket first, fall back to polling if needed
       reconnectionAttempts: 10,             // Try to reconnect 10 times
       reconnectionDelay: 1000,              // Start with a 1-second delay
@@ -183,7 +183,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
         const auctionSlug = data.auction_slug;
         console.log(`Fetching auction details by slug: ${auctionSlug}`);
         
-        fetch(`http://localhost:5000/catalog/${auctionSlug}`)
+        fetch(`http://localhost:5001/catalog/${auctionSlug}`)
           .then(res => {
             console.log('Auction details response status:', res.status);
             if (!res.ok) {
@@ -277,7 +277,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
         // Otherwise fetch the auction data using slug
         else if (data.auction_slug) {
           console.log(`Fetching auction details by slug: ${data.auction_slug}`);
-          fetch(`http://localhost:5000/catalog/${data.auction_slug}`)
+          fetch(`http://localhost:5001/catalog/${data.auction_slug}`)
             .then(res => {
               if (!res.ok) {
                 throw new Error(`Failed to fetch auction details with status: ${res.status}`);

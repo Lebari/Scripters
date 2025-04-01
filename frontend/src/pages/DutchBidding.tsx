@@ -76,7 +76,7 @@ function DutchBidding() {
     
     axios
       .post(
-        `http://localhost:5000/bid/dutch/${auctionSlug}`, 
+        `http://localhost:5001/bid/dutch/${auctionSlug}`, 
         { price: currentPrice },
         {
           headers: {

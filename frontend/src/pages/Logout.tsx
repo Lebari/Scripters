@@ -7,7 +7,7 @@ const Logout = () => {
 
     const logoutU = () =>{
         axios({
-            baseURL: "http://localhost:5000",
+            baseURL: "http://localhost:5001",
             url: "logout",
             method: "post"
         }).then((result) => {

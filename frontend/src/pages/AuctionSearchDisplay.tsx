@@ -56,7 +56,7 @@ function AuctionSearchDisplay() {
   useEffect(() => {
     setLoading(true);
     axios
-      .get("http://localhost:5000/search/")
+      .get("http://localhost:5001/search/")
       .then((res) => {
         if (res.data.status === "success" && res.data.auctions) {
           // Filter for active auctions only
@@ -83,7 +83,7 @@ function AuctionSearchDisplay() {
 
     if (keyword.trim() === "") {
       axios
-        .get("http://localhost:5000/search/")
+        .get("http://localhost:5001/search/")
         .then((res) => {
           if (res.data.status === "success" && res.data.auctions) {
             // Filter for active auctions only
@@ -96,7 +96,7 @@ function AuctionSearchDisplay() {
         .finally(() => setLoading(false));
     } else {
       axios
-        .post("http://localhost:5000/search/", { keyword: keyword.trim() })
+        .post("http://localhost:5001/search/", { keyword: keyword.trim() })
         .then((res) => {
           if (res.data.status === "success" && res.data.results) {
             // Filter for active auctions only

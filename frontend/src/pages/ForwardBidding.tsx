@@ -36,7 +36,7 @@ function ForwardBidding() {
         
         // Fetch the auction details to get the current highest bid
         const response = await axios.get(
-          `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/catalog/${encodeURIComponent(auctionSlug)}`
+          `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/catalog/${encodeURIComponent(auctionSlug)}`
         );
         
         console.log("Auction details for bid:", response.data);
@@ -144,7 +144,7 @@ function ForwardBidding() {
     // Send bid to the backend
     axios
       .post(
-        `http://localhost:5000/bid/forward/${auctionSlug}`, 
+        `http://localhost:5001/bid/forward/${auctionSlug}`, 
         { price: numericBidPrice },
         {
           headers: {

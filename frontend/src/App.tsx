@@ -27,7 +27,7 @@ function App() {
 
     const getUser = ()=>{
         axios({
-            baseURL: "http://localhost:5000",
+            baseURL: "http://localhost:5001",
             url: "user",
             method: "get"
         }).then((result) => {

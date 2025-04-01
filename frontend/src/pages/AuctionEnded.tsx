@@ -92,7 +92,7 @@ function AuctionEnded() {
         }
 
         // Make API call to get auction details with slug properly encoded
-        const apiUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/catalog/${encodeURIComponent(auctionSlug)}`;
+        const apiUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/catalog/${encodeURIComponent(auctionSlug)}`;
         console.log("Making API request to:", apiUrl);
         
         const response = await axios.get(apiUrl);

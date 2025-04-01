@@ -14,7 +14,7 @@ import logging
 import redis
 from datetime import datetime, timedelta
 from app.models import Auction, Item, User, AuctionType
-from backend.database import init_db
+from database import init_db
 
 # Set up logging
 logging.basicConfig(
