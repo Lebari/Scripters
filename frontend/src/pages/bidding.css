@@ -4,6 +4,7 @@
     margin: 2rem auto;
     padding: 1rem;
     text-align: center;
+    color: #000;
   }
   
   /* Main heading (e.g., "Forward Auction Bidding" or "Dutch Auction Purchase") */
@@ -11,7 +12,7 @@
     font-size: 1.8rem;
     font-weight: 600;
     margin-bottom: 1.5rem;
-    color: #2f3e46;
+    color: #fff;
   }
   
   /* Card-like container for item info and form */
@@ -21,6 +22,7 @@
     padding: 1.5rem;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     text-align: left;
+    color: #000;
   }
   
   /* Item name or title */
@@ -28,14 +30,14 @@
     font-size: 1.4rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
-    color: #333;
+    color: #000;
   }
   
   /* Current bid or price info */
   .bidding-current-bid {
     font-size: 1rem;
     margin-bottom: 1rem;
-    color: #555;
+    color: #000;
   }
   
   /* The form layout */
@@ -49,7 +51,7 @@
   /* Label for the input */
   .bidding-label {
     font-weight: 500;
-    color: #333;
+    color: #000;
   }
   
   /* Input for bid/price */
@@ -58,6 +60,7 @@
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 1rem;
+    color: #000;
   }
   
   /* Main button (e.g., "Place Bid" or "Buy Now") */
@@ -86,5 +89,130 @@
   .bidding-success {
     color: #0a0;
     margin-top: 0.5rem;
+  }
+  
+  .bidding-note {
+    color: #000;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    font-style: italic;
+  }
+  
+  /* Auction Ended Page Styles */
+  .auction-success-message {
+    background-color: #e6f7e6;
+    border-left: 4px solid #4caf50;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 0 4px 4px 0;
+  }
+  
+  .auction-success-message p {
+    color: #000;
+    font-weight: 500;
+    margin: 0;
+  }
+  
+  .auction-ended-message {
+    background-color: #f8e6e6;
+    border-left: 4px solid #d00;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 0 4px 4px 0;
+  }
+  
+  .auction-ended-message p {
+    margin: 0;
+    color: #000;
+  }
+  
+  .auction-details {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+  }
+  
+  .auction-details p {
+    margin: 0.5rem 0;
+    color: #000;
+    font-weight: 500;
+  }
+  
+  .auction-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  
+  /* Pay Now Page Styles */
+  .logo-container {
+    border-bottom: 2px solid #e0e0e0;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+  }
+  
+  .company-logo {
+    font-size: 1.5rem;
+    color: #fff;
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  
+  .pay-now-card {
+    border: 1px solid #e0e0e0;
+    position: relative;
+  }
+  
+  .pay-now-button {
+    background-color: #d32f2f;
+    font-size: 1.1rem;
+    padding: 0.8rem 2rem;
+    border: none !important;
+    color: white !important;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .pay-now-button:hover {
+    background-color: #b71c1c;
+  }
+  
+  .item-details {
+    margin: 1.5rem 0;
+    border-bottom: 1px solid #eaeaea;
+    padding-bottom: 1rem;
+  }
+  
+  .item-details p {
+    color: #000;
+    margin: 0.5rem 0;
+    font-weight: 500;
+  }
+  
+  .expedited-shipping-option {
+    background-color: #fff9c4 !important;
+    padding: 0.8rem;
+    border-radius: 4px;
+    margin: 1rem 0;
+    border-left: 3px solid #fbc02d;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .expedited-checkbox {
+    margin-right: 0.8rem;
+    transform: scale(1.2);
+    flex-shrink: 0;
+  }
+  
+  .expedited-label {
+    color: #000;
+    font-weight: 500;
+    display: inline-block;
+    line-height: 1.3;
+    cursor: pointer;
   }
   

@@ -21,7 +21,7 @@ const Login = () => {
     const loginU = (event: React.FormEvent) =>{
         console.log(`user ${loginForm.uname} pw ${loginForm.pw}`)
         axios({
-            baseURL: "http://localhost:5000",
+            baseURL: "http://localhost:5001",
             url: "login",
             method: "post",
             data: {

@@ -1,8 +1,8 @@
 import {tv} from 'tailwind-variants'
 
 export const baseButton = tv({
-    base: 'mt-5 py-1 px-2 border border-brown' +
-        'cursor-pointer hover:border-transparent' +
+    base: 'mt-5 rounded-md transition-all duration-200 ' +
+        'cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 ' +
         'text-center relative align-middle inline-flex items-center justify-center',
     variants: {
         size: {
@@ -11,17 +11,17 @@ export const baseButton = tv({
             md: 'text-sm py-2 px-4',
             xl: 'text-lg py-4 px-8',
             xxl: 'text-xl py-5 px-10',
-            square_xs: 'text-xs h-4 w-4 p-1',
-            square_sm: 'text-sm h-6 w-6 p-1',
-            square_md: 'text-base h-8 w-8 p-1',
-            square_lg: 'text-lg h-10 w-10 p-1',
-            square_xl: 'text-xl h-12 w-12 p-1',
+            square_xs: 'text-xs h-8 w-8 p-0',
+            square_sm: 'text-sm h-10 w-10 p-0',
+            square_md: 'text-base h-12 w-12 p-0',
+            square_lg: 'text-lg h-14 w-14 p-0',
+            square_xl: 'text-xl h-16 w-16 p-0',
         },
         vPadding: {
-            xs: 'py-[4px]',
-            sm: 'py-[8px]',
-            md: 'py-[12px]',
-            lg: 'py-[16px]',
+            xs: 'py-1',
+            sm: 'py-2',
+            md: 'py-3',
+            lg: 'py-4',
         },
         vSpace: {
             xs: 'my-1',
@@ -45,26 +45,29 @@ export const baseButton = tv({
         behavior: {
             block: 'w-full',
         },
+        responsive: {
+            true: 'text-sm py-2 px-3 md:text-base md:py-3 md:px-4',
+        }
     }
 });
 
-// solid button
+// Primary button (was "clicked")
 export const clickedButton = tv({
     extend: baseButton,
-    base: 'bg-green_light text-black border-green_light'+
-        ' hover:text-black hover:bg-transparent hover:border-green_light'
+    base: 'bg-gold text-black-800 border border-gold shadow-sm ' +
+        'hover:bg-gold-light hover:border-gold-light hover:shadow-md focus:ring-gold active:bg-gold-dark'
 });
 
-// see through button
+// Secondary button
 export const secButton = tv({
     extend: baseButton,
-    base: 'bg-transparent border border-green_light' +
-        ' hover:text-black hover:bg-green_light hover:border-transparent'
+    base: 'bg-transparent border border-gold text-gold ' +
+        'hover:bg-gold/10 focus:ring-gold'
 });
 
-// warning button
+// Warning button
 export const warnButton = tv({
     extend: baseButton,
-    base: 'bg-transparent border border-red' +
-        ' hover:text-white hover:font-medium hover:bg-red'
+    base: 'bg-transparent border border-accent-red text-accent-red ' +
+        'hover:bg-accent-red/10 hover:text-accent-red focus:ring-accent-red'
 });

@@ -3,10 +3,11 @@ import logging
 import json
 from ..validations import validate_new_auction, seller_required
 from ...models import Auction, Item, AuctionType
-from backend.app import redis_client
+from flask import jsonify, request, current_app
 from flask import jsonify, request
 from datetime import datetime
 from flask_jwt_extended import jwt_required, current_user
+from backend.app import redis_client
 
 
 @catalog.route("/", methods=["GET"])
@@ -25,12 +26,12 @@ def get_all_auctions():
 def get_auction(slug):
     print("Hello from get_auction!")
     # return auction with specified slug
-    auction = Auction.objects(slug=slug).first().to_json()
+    auction = Auction.objects(slug=slug).first()
 
     if auction is None:
-        return jsonify({"error": "Invalid slug"}), 400
+        return jsonify({"error": "Auction not found"}), 404
 
-    return jsonify({"auction": auction}), 201
+    return jsonify({"auction": auction.to_json()}), 200
 
 
 @catalog.route("/upload", methods=["POST"])
@@ -50,6 +51,7 @@ def upload_auction():
         )
         new_item.save()
 
+        current_time = datetime.now()  # Use UTC time consistently
         # create auction
         new_auction = Auction(
             item = new_item,
@@ -58,9 +60,14 @@ def upload_auction():
             duration = data["duration"],
             seller = current_user,
             is_active = True,
-            date_added = datetime.now()
+            date_added = current_time,
+            date_updated = current_time
         )
         new_auction.save()
+
+        # Schedule the auction to expire based on its duration
+        current_app.schedule_auction_expiration(new_auction)
+        logging.info(f"Created and scheduled new auction {new_auction.slug} to expire in {new_auction.duration} minutes")
 
         # ensure some user is logged in
         if not current_user:
