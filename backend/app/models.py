@@ -5,6 +5,7 @@ from mongoengine import Document, StringField, IntField, ListField, \
     ReferenceField, DateTimeField, BooleanField
 from flask_login import UserMixin, AnonymousUserMixin
 from werkzeug.security import check_password_hash
+import uuid
 
 
 class AuctionType(StrEnum):
@@ -236,6 +237,7 @@ class Card(Document):
 
 
 class Payment(Document):
+    payment_id = StringField(required=True, unique=True, default=lambda: str(uuid.uuid4()))
     user = ReferenceField(User, required=True)
     auction = ReferenceField(Auction, required=True)
     amount = IntField(required=True)
@@ -246,6 +248,7 @@ class Payment(Document):
     def to_json(self):
         return {
             "id": str(self.id),
+            "payment_id": self.payment_id,
             "user_id": str(self.user.id) if self.user else None,
             "auction_id": str(self.auction.id) if self.auction else None,
             "amount": self.amount,
