@@ -150,7 +150,7 @@ The Docker setup consists of three containers:
 ### Ports
 - Frontend runs on port 5173
 - Backend runs on port 5001 (when using Docker)
-- Backend runs on port 5000 (when running locally)
+- When running locally, use run command `flask run - localhost -port 5001`
 - Redis runs on port 6379
 
 
