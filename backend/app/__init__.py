@@ -112,10 +112,10 @@ def create_app():
     def check_expired_auctions():
         """
         Query active auctions with type 'forward' and check if their expiration time has passed.
-        For each expired auction, mark it as inactive, determine the winner (auction.event.user), 
+        For each expired auction, mark it as inactive, determine the winner (auction.event.user),
         and publish an event with the auction ID, expiration timestamp, and winner information.
         """
-        now = datetime.now()
+        now = datetime.utcnow()
         logging.info(f"Running auction expiration check at UTC: {now.isoformat()}")
 
         # Query auctions where is_active is True and auction_type is 'forward'
@@ -333,6 +333,9 @@ def create_app():
             time.sleep(5)  # Wait a bit before reconnecting
             socketio.start_background_task(redis_listener)
 
+
+
+
     # Configure JWT Manager for session mgt.
     app.config["JWT_SECRET_KEY"] = SECRET_KEY
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=2)
@@ -344,7 +347,6 @@ def create_app():
         username = jwt_data["sub"]
         return User.objects(username=username).first() or None
 
-    # Register Blueprints
     from .src import src as main_blueprint
     from .tests import tests as tests_blueprint
 

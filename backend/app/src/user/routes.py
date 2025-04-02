@@ -14,7 +14,7 @@ def get_user():
         return jsonify({"error": str(e)}), 400
 
 
-@user.route("/myauctions", methods=["GET"])
+@user.route("/me", methods=["GET"])
 @jwt_required()
 def get_user_auctions():
     print("Hello from get_user_auctions")

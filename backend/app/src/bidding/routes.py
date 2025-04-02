@@ -5,6 +5,28 @@ from datetime import datetime
 from flask_jwt_extended import current_user, jwt_required
 
 
+@bidding.route('/<slug>/highestBid', methods=['GET'])
+@jwt_required()
+def get_highest_bid(slug):
+    print("hello from get_highest_bid")
+    auction = Auction.objects(slug=slug).first()
+
+    if not auction:
+        abort(404, description="Auction not found.")
+    if not auction.is_active:
+        return jsonify({"error": "Auction is no longer active."}), 400
+
+    try:
+        # get auction's event for latest bid
+        print("latest_bid")
+        latest_bid = auction.event.price
+        return jsonify({"price": latest_bid}), 201
+    except:
+
+        print("no latest_bid")
+        return jsonify({"price": auction.item.price}), 201
+
+
 @bidding.route('/forward/<slug>', methods=['POST'])
 @jwt_required()
 def bid_forward(slug):
@@ -36,7 +58,7 @@ def bid_forward(slug):
     auction.date_updated = datetime.now()
     auction.save()
 
-    # Create a new Sale object.
+    # Create a new Bid object.
     bid = Bid(
         user=current_user,           # logged in buyer
         event_type=EventType.BID,   # type of event

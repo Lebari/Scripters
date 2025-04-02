@@ -20,7 +20,7 @@ const SignUp = () => {
     const signUp = (event: React.FormEvent) =>{
         console.log(`user ${signupForm.uname} pw ${signupForm.pw}`)
         axios({
-            baseURL: "http://localhost:5001",
+            baseURL: import.meta.env.VITE_API_URL,
             url: "signup",
             method: "post",
             data: {
@@ -60,7 +60,7 @@ const SignUp = () => {
         )
     }
     const fieldStyle = "border";
-    const lineDIVStyle = "flex flex-row gap-2";
+    const lineDIVStyle = "grid grid-cols-1 max-w-md items-start pt-4 pb-2";
 
     return(
         <div className={"flex flex-col items-center gap-4"}>
@@ -69,41 +69,41 @@ const SignUp = () => {
                 <div className={"grid grid-cols-1 white max-w-md items-start"}>
                     <div className={lineDIVStyle}>
                     <label htmlFor={"fname"}>First Name</label>
-                    <input type={"text"} name={"fname"} value={signupForm.fname} onChange={updateForm} className={fieldStyle}/>
+                    <input type={"text"} name={"fname"} value={signupForm.fname} onChange={updateForm} className={fieldStyle} maxLength={50}/>
                     </div>
                     <div className={lineDIVStyle}>
                     <label htmlFor={"lname"}>Last Name</label>
-                    <input type={"text"} name={"lname"} value={signupForm.lname} onChange={updateForm} className={fieldStyle}/>
+                    <input type={"text"} name={"lname"} value={signupForm.lname} onChange={updateForm} className={fieldStyle} maxLength={50}/>
                     </div>
 
                     <div className={lineDIVStyle}>
                     <label htmlFor={"uname"}>Username</label>
-                    <input type={"text"} name={"uname"} value={signupForm.uname} onChange={updateForm} className={fieldStyle}/>
+                    <input type={"text"} name={"uname"} value={signupForm.uname} onChange={updateForm} className={fieldStyle} maxLength={50}/>
                     </div>
                     <div className={lineDIVStyle}>
                     <label htmlFor={"pw"}>Password</label>
-                    <input type={"text"} name={"pw"} value={signupForm.pw} onChange={updateForm} className={fieldStyle}/>
+                    <input type={"text"} name={"pw"} value={signupForm.pw} onChange={updateForm} className={fieldStyle} maxLength={50}/>
                     </div>
 
                     <div className={lineDIVStyle}>
                     <label htmlFor={"streetno"}>Street Number</label>
-                    <input type={"text"} name={"streetno"} value={signupForm.streetno} onChange={updateForm} className={fieldStyle}/>
+                    <input type={"text"} name={"streetno"} value={signupForm.streetno} onChange={updateForm} className={fieldStyle} maxLength={50}/>
                     </div>
                     <div className={lineDIVStyle}>
                     <label htmlFor={"street"}>Street Address</label>
-                    <input type={"text"} name={"street"} value={signupForm.street} onChange={updateForm} className={fieldStyle}/>
+                    <input type={"text"} name={"street"} value={signupForm.street} onChange={updateForm} className={fieldStyle} maxLength={50}/>
                     </div>
                     <div className={lineDIVStyle}>
                     <label htmlFor={"city"}>City</label>
-                    <input type={"text"} name={"city"} value={signupForm.city} onChange={updateForm} className={fieldStyle}/>
+                    <input type={"text"} name={"city"} value={signupForm.city} onChange={updateForm} className={fieldStyle} maxLength={50}/>
                     </div>
                     <div className={lineDIVStyle}>
                     <label htmlFor={"country"}>Country</label>
-                    <input type={"text"} name={"country"} value={signupForm.country} onChange={updateForm} className={fieldStyle}/>
+                    <input type={"text"} name={"country"} value={signupForm.country} onChange={updateForm} className={fieldStyle} maxLength={50}/>
                     </div>
                     <div className={lineDIVStyle}>
                     <label htmlFor={"postal"}>Postal Code</label>
-                    <input type={"text"} name={"postal"} value={signupForm.postal} onChange={updateForm} className={fieldStyle}/>
+                    <input type={"text"} name={"postal"} value={signupForm.postal} onChange={updateForm} className={fieldStyle} maxLength={50}/>
                     </div>
 
                     <Button type={"submit"} name={"submit"} onClick={signUp} className={"mt-8"}>Sign Up</Button>

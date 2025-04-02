@@ -1,10 +1,10 @@
 from . import catalog
 import logging
 import json
-from ..validations import validate_new_auction, seller_required
+from ..validations import validate_new_auction, seller_required, validate_update_auction
 from ...models import Auction, Item, AuctionType
 from flask import jsonify, request, current_app
-from flask import jsonify, request
+from mongoengine import Q
 from datetime import datetime
 from flask_jwt_extended import jwt_required, current_user
 from backend.app import redis_client
@@ -13,8 +13,21 @@ from backend.app import redis_client
 @catalog.route("/", methods=["GET"])
 def get_all_auctions():
     print("Hello from get_all_auctions!")
+
+    # Get pagination parameters (default is 0 offset and 20 limit)
+    limit = request.args.get('limit', 20, type=int)
+    offset = request.args.get('offset', 0, type=int)
+
+    # build query
+    query = Q()  # is_deleted=False
+    active = request.args.get('active', 0, type=int)  # Get only active auctions (default to false)
+    if active:
+        query &= Q(is_active=True)
+
+    # Query the items with the pagination parameters
+    auctions = Auction.objects(query).skip((offset // limit) + 1).limit(limit)
+
     # return all auctions
-    auctions = Auction.objects()
     auctions_json = []
     for auction in auctions:
         auctions_json.append(auction.to_json())
@@ -88,30 +101,31 @@ def upload_auction():
         return jsonify({"error": str(e)}), 400
 
 
-@catalog.route("/<slug>/dutch-update", methods=["PATCH"])
+@catalog.route("/<slug>/update", methods=["PATCH"])
 @jwt_required()
 @seller_required
-def update_dutch_auction(slug):
-    print("Hello from update_dutch_auction")
+@validate_update_auction
+def update_auction(slug):
+    print("Hello from update_auction")
 
     try:
         # Retrieve auction from database
         auction = Auction.objects(slug=slug).first()
         if not auction:
             return jsonify({"error": "Auction not found."}), 404
+        old_price = auction.item.price
 
-        # Get the new price from JSON request body
-        new_price = request.json.get("price")
-        if new_price is None:
-            return jsonify({"error": "Price is required."}), 400
+        # Get the new details from JSON request body
+        # only name, price, status, category and duration may be edited
+        data = request.json
 
-        if new_price < 0:
-            return jsonify({"error": "Price must be non-negative."}), 400
+        new_name = data["name"]
+        new_price = data["price"]
+        new_status = data["status"]
+        new_category = data["category"]
+        new_duration = data["duration"]
 
-        if auction.auction_type != AuctionType.DUTCH:
-            return jsonify({"error": "Auction must be of type dutch."}), 400
-
-        if not auction.is_active:
+        if not auction.is_active and not new_status:
             return jsonify({"error": "Auction must be active to update."}), 400
 
         if current_user.id != auction.seller.id:
@@ -122,24 +136,87 @@ def update_dutch_auction(slug):
         if not item:
             return jsonify({"error": "Item not found."}), 404
 
+        # update item and auction
+        item.name = new_name
         item.price = new_price
+        item.status = new_status
+        item.category = new_category
         item.save()
 
-        # Publish a price update event to Redis for frontend notification
-        event_data = {
-            'auction_id': auction.get_id(),
-            'new_price': new_price,
-            'updated_at': datetime.now().timestamp()
-        }
-        try:
-            redis_client.publish('auction_price_changed', json.dumps(event_data))
-            print("--------------------alsdkhasldhalsdkhaosdhalskd")
-            logging.info(f"Published price update event: {event_data}")
-        except Exception as pub_err:
-            logging.error(f"Error publishing price update event: {pub_err}")
+        auction.duration = new_duration
+        auction.save()
 
-        return jsonify({"message": "Auction price updated"}), 201
+        # Publish a price update event to Redis for frontend notification if price changed
+        if old_price != new_price:
+            event_data = {
+                'auction_id': auction.get_id(),
+                'new_price': new_price,
+                'updated_at': datetime.now().timestamp()
+            }
+
+            try:
+                redis_client.publish('auction_price_changed', json.dumps(event_data))
+                logging.info(f"Published price update event: {event_data}")
+            except Exception as pub_err:
+                logging.error(f"Error publishing price update event: {pub_err}")
+
+        return jsonify({"message": "Auction updated", "auction": auction.to_json()}), 201
     except Exception as e:
-        logging.error(f"Error in update_dutch_auction: {e}")
+        logging.error(f"Error in update_auction: {e}")
         return jsonify({"error": str(e)}), 400
+
+
+# @catalog.route("/<slug>/dutch-update", methods=["PATCH"])
+# @jwt_required()
+# @seller_required
+# def update_dutch_auction(slug):
+#     print("Hello from update_dutch_auction")
+#
+#     try:
+#         # Retrieve auction from database
+#         auction = Auction.objects(slug=slug).first()
+#         if not auction:
+#             return jsonify({"error": "Auction not found."}), 404
+#
+#         # Get the new price from JSON request body
+#         new_price = request.json.get("price")
+#         if new_price is None:
+#             return jsonify({"error": "Price is required."}), 400
+#
+#         if new_price < 0:
+#             return jsonify({"error": "Price must be non-negative."}), 400
+#
+#         if auction.auction_type != AuctionType.DUTCH:
+#             return jsonify({"error": "Auction must be of type dutch."}), 400
+#
+#         if not auction.is_active:
+#             return jsonify({"error": "Auction must be active to update."}), 400
+#
+#         if current_user.id != auction.seller.id:
+#             return jsonify({"error": "User is not auction's seller."}), 400
+#
+#         # Update the item price
+#         item = Item.objects(id=auction.item.id).first()
+#         if not item:
+#             return jsonify({"error": "Item not found."}), 404
+#
+#         item.price = new_price
+#         item.save()
+#
+#         # Publish a price update event to Redis for frontend notification
+#         event_data = {
+#             'auction_id': auction.get_id(),
+#             'new_price': new_price,
+#             'updated_at': datetime.now().timestamp()
+#         }
+#         try:
+#             redis_client.publish('auction_price_changed', json.dumps(event_data))
+#             logging.info(f"Published price update event: {event_data}")
+#         except Exception as pub_err:
+#             logging.error(f"Error publishing price update event: {pub_err}")
+#
+#         return jsonify({"message": "Auction price updated"}), 201
+#     except Exception as e:
+#         logging.error(f"Error in update_dutch_auction: {e}")
+#         return jsonify({"error": str(e)}), 400
 

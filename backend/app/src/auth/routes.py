@@ -58,14 +58,3 @@ def login():
         return jsonify({"error": str(e)}), 400
 
 
-@auth.route("/logout", methods=["POST"])
-@jwt_required()
-def logout():
-    print("Hello from logout")
-    try:
-        response = jsonify({"message": "Sign out successful"})
-        unset_jwt_cookies(response)
-        return response, 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
-

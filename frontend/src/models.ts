@@ -45,7 +45,7 @@ export interface Auction{
     slug: string,
     auction_type: string,
     is_active: string,
-    duration: string,
+    duration: number,
     seller: UserDesc,
     date_added: string,
     date_updated: string,
