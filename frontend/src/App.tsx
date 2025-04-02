@@ -112,7 +112,7 @@ function App() {
                             <Route path="/auction-ended" element={<AuctionEnded />} />
                             <Route path={import.meta.env.VITE_APP_UPDATE_URL} element={<UC7UpdateDutchPage />} />
                             <Route path={import.meta.env.VITE_APP_UC5PAY_URL || "/payment"} element={<Payment />} />
-                            <Route path="/receipt/:id" element={<Receipt />} />
+                            <Route path="/receipt" element={<Receipt />} />
                         </Routes>
                     </div>
 

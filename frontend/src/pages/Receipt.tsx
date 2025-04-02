@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import axios from "axios";
 
 const Receipt = () => {
-  const { id: purchaseId } = useParams(); // Gets :id from URL
   const [receipt, setReceipt] = useState<any>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -16,23 +14,17 @@ const Receipt = () => {
 
       const token = localStorage.getItem("token");
 
-      if (!purchaseId) {
-        setError("Missing purchase ID.");
-        setLoading(false);
-        return;
-      }
-
       try {
-        const response = await axios.post(
-          `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/receipt`,
-          { purchase_id: purchaseId },
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/receipt`,
           {
             headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`,
-            },
+              "Authorization": `Bearer ${token}`
+            }
           }
         );
+
+        console.log("Receipt response:", response.data);
 
         if (response.data.receipt) {
           setReceipt(response.data.receipt);
@@ -40,14 +32,15 @@ const Receipt = () => {
           setError("Receipt not found.");
         }
       } catch (err: any) {
-        setError(err.response?.data?.error || "Error fetching receipt.");
+        console.error("Receipt error:", err.response?.data);
+        setError(err.response?.data?.error || "Failed to fetch receipt.");
       } finally {
         setLoading(false);
       }
     };
 
     fetchReceipt();
-  }, [purchaseId]);
+  }, []);
 
   return (
     <div className="receipt-container">
