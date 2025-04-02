@@ -51,9 +51,13 @@ const Payment = () => {
         }
       );
 
-      const purchaseId = response.data.payment_id;
+      const purchaseId = response.data.payment.payment_id;
 
-      navigate(`/receipt/${purchaseId}`);
+      navigate('/receipt', {
+        state: { purchaseId }
+      });
+      
+      
     } catch (err: any) {
       console.error("Payment error:", err);
       setError(err.response?.data?.error || "Payment failed. Please try again.");
