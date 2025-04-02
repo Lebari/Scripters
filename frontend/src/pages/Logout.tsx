@@ -1,4 +1,3 @@
-import axios from "axios";
 import {useTokenContext} from "../components/TokenContext.tsx";
 import {useEffect} from "react";
 
@@ -6,20 +5,8 @@ const Logout = () => {
     const {removeUser} = useTokenContext();
 
     const logoutU = () =>{
-        axios({
-            baseURL: "http://localhost:5001",
-            url: "logout",
-            method: "post"
-        }).then((result) => {
-            console.log(result);
-            removeUser();
-        }).catch((error) => {
-            if (error.response) {
-                console.log(error.response);
-                console.log(error.response.status);
-                console.log(error.response.headers);
-            }
-        });
+        console.log("Sign Out Successful");
+        removeUser();
     }
     useEffect(() => {
         logoutU();

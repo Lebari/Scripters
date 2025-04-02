@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import { Auction as AuctionType } from '../models.ts';
 import Button from '../components/Button.tsx';
 import axios from "axios";
 
 const AuctionPage: React.FC = () => {
+    const navigate = useNavigate();
     const location = useLocation();
     const { name } = useParams<{ name: string }>();
     const [auction, setAuction] = useState<AuctionType | null>(location.state as AuctionType);
@@ -19,28 +20,14 @@ const AuctionPage: React.FC = () => {
             return;
         }
         if(name){
-        try {
-            // TODO allow for forward bid
-            axios({
-                baseURL: "http://localhost:5001",
-                url: `${encodeURIComponent(name)}/dutch-update`,
-                method: "patch",
-            }).then(async (result) => {
-                console.log(result.data);
-                setPopupVisible(true); 
-                setTimeout(() => setPopupVisible(false), 800); 
-            }).catch(async (error) => {
-                if (error.response) {
-                    console.log(error.response);
-                    console.log(error.response.status);
-                    console.log(error.response.headers);
-                    setError('Failed to place bid. Please try again.');
-                }
-            });
-        } catch (error) {
-            console.error("Failed to bid:", error);
-            setError('An unexpected error occurred.');
-        }
+            if (auction.auction_type === "Forward") {
+                navigate(import.meta.env.VITE_APP_UC31FWDBIDDING_URL, { state: { auction: auction } });
+            } else if (auction.auction_type === "Dutch") {
+                // Pass the auction (which now includes the current bid, i.e. item.price) to DutchBidding
+                navigate(import.meta.env.VITE_APP_UC32DCHBIDDING_URL, { state: { auction: auction } });
+            } else {
+                console.log("Unknown auction type:", auction.auction_type);
+            }
         }
     };
 
@@ -51,32 +38,16 @@ const AuctionPage: React.FC = () => {
         }
 
         if(name){
-        try {
-            axios({
-                baseURL: "http://localhost:5001",
-                url: `catalog/${encodeURIComponent(name)}/dutch-update`,
-                method: "patch",
-                data:{
-                    price: priceInput
+            if(name){
+                if (auction.auction_type === "Forward") {
+                    navigate(import.meta.env.VITE_APP_UC31FWDBIDDING_URL, { state: { auction: auction } });
+                } else if (auction.auction_type === "Dutch") {
+                    // Pass the auction (which now includes the current bid, i.e. item.price) to DutchBidding
+                    navigate(import.meta.env.VITE_APP_UC32DCHBIDDING_URL, { state: { auction: auction } });
+                } else {
+                    console.log("Unknown auction type:", auction.auction_type);
                 }
-            }).then(async (result) => {
-                console.log(result.data);
-                setPopupVisible(true); 
-                setTimeout(() => setPopupVisible(false), 800); 
-                getAuctionCall(name);
-                setError('');
-            }).catch(async (error) => {
-                if (error.response) {
-                    console.log(error.response);
-                    console.log(error.response.status);
-                    console.log(error.response.headers);
-                    setError('Failed to update price. Please try again.');
-                }
-            });
-        } catch (error) {
-            console.error("Failed to bid:", error);
-            setError('An unexpected error occurred.');
-        }
+            }
         }
     };
     
@@ -92,7 +63,7 @@ const AuctionPage: React.FC = () => {
 
     const getAuctionCall = (name: string)=>{
         axios({
-            baseURL: "http://localhost:5001",
+            baseURL: import.meta.env.VITE_API_URL,
             url: `catalog/${encodeURIComponent(name)}`,
             method: "get",
         }).then(async (result) => {
@@ -159,7 +130,7 @@ const AuctionPage: React.FC = () => {
 
                         <div className="mb-6">
                             <p className="text-3xl font-bold text-gold mb-2">
-                                ${auction.item.price.toFixed(2)}
+                                ${auction.item.price.toFixed(0)}
                             </p>
                             <p className="text-sm text-gray-400">Category: {auction.item.category}</p>
                             <p className="text-sm mt-2 text-gray-500">Auction ID: {auction.slug}</p>
@@ -205,6 +176,7 @@ const AuctionPage: React.FC = () => {
                                                 onChange={updateForm}
                                                 className="bg-black-900 border border-gray-700 focus:ring-gold focus:border-gold block w-full pl-7 pr-12 py-3 sm:text-sm rounded-md"
                                                 placeholder="0.00"
+                                                maxLength={6}
                                             />
                                         </div>
                                         <Button 
@@ -233,6 +205,7 @@ const AuctionPage: React.FC = () => {
                                                 onChange={updateForm}
                                                 className="bg-black-900 border border-gray-700 focus:ring-gold focus:border-gold block w-full pl-7 pr-12 py-3 sm:text-sm rounded-md"
                                                 placeholder="0.00"
+                                                maxLength={6}
                                             />
                                         </div>
                                         <Button 

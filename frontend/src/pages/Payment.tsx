@@ -76,16 +76,16 @@ const Payment = () => {
 
       <form onSubmit={handlePaymentSubmit}>
         <label>Card Number:</label>
-        <input type="text" name="card_number" onChange={handleChange} required />
+        <input type="text" name="card_number" onChange={handleChange} required  maxLength={16}/>
 
         <label>Card Holder Name:</label>
-        <input type="text" name="card_name" onChange={handleChange} required />
+        <input type="text" name="card_name" onChange={handleChange} required maxLength={50} />
 
-        <label>Expiration Date:</label>
-        <input type="text" name="exp_date" onChange={handleChange} required />
+        <label>Expiration Date MMYY:</label>
+        <input type="text" name="exp_date" onChange={handleChange} required  maxLength={4}/>
 
-        <label>Security Code:</label>
-        <input type="password" name="security_code" onChange={handleChange} required />
+        <label>Security Code XXX:</label>
+        <input type="password" name="security_code" onChange={handleChange} required  maxLength={3}/>
 
         <button type="submit" disabled={loading}>
           {loading ? "Processing..." : "Submit Payment"}

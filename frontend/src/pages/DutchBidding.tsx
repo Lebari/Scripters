@@ -76,7 +76,7 @@ function DutchBidding() {
     
     axios
       .post(
-        `http://localhost:5001/bid/dutch/${auctionSlug}`, 
+        `${import.meta.env.VITE_API_URL}/bid/dutch/${auctionSlug}`,
         { price: currentPrice },
         {
           headers: {

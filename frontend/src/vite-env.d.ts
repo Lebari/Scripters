@@ -7,7 +7,8 @@ interface ImportMetaEnv {
     readonly VITE_APP_CATALOG_URL: string
     readonly VITE_APP_SEARCH_URL: string
     readonly VITE_APP_UPLOAD_URL: string
-    readonly VITE_APP_UPDATE_URL: string
+    readonly VITE_APP_DCH_UPDATE_URL: string
+    readonly VITE_APP_FWD_UPDATE_URL: string
     readonly VITE_APP_UC31FWDBIDDING_URL: string
     readonly VITE_APP_UC32DCHBIDDING_URL: string
     readonly VITE_APP_UC4END_URL: string

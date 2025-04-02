@@ -2,18 +2,58 @@ import axios from "axios";
 import {useEffect, useState} from "react"
 import {Auction as AuctionType} from "../models.ts";
 import Auction from  "../components/Auction.tsx"
+import Button from "../components/Button.tsx";
 
 const Catalog = () => {
     const [catalog, setCatalogsList] = useState([]);
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [offset, setOffset] = useState(0);
+    const [limit, setLimit] = useState(20);
+
+    const loadMore =()=>{
+        setLoading(true);
+        axios({
+            baseURL: import.meta.env.VITE_API_URL,
+            url: "catalog/",
+            method: "get",
+            params:{
+                limit: limit,
+                offset: offset,
+                active: 1
+            }
+        }).then((result) => {
+            if(!result) {
+                setLimit(0);
+                console.log("No more results to display");
+                return;
+            }
+            console.log(result);
+            setSuccess(true);
+            const newCatalog = catalog.concat(result.data.auctions)
+            setCatalogsList(newCatalog);
+            setLoading(false);
+        }).catch((error) => {
+            if (error.response) {
+                console.log(error.response);
+                console.log(error.response.status);
+                console.log(error.response.headers);
+            }
+            setLoading(false);
+        });
+    }
 
     const getAllAuctions = () =>{
         setLoading(true);
         axios({
-            baseURL: "http://localhost:5001",
+            baseURL: import.meta.env.VITE_API_URL,
             url: "catalog/",
             method: "get",
+            params:{
+                limit: limit,
+                offset: offset,
+                active: 1
+            }
         }).then((result) => {
             console.log(result);
             setSuccess(true);
@@ -37,14 +77,8 @@ const Catalog = () => {
                 <div className="w-24 h-1 bg-gradient-to-r from-gold-dark to-gold-light mx-auto my-4 rounded-full"></div>
                 <p className="text-lg text-gray-300">Discover exceptional items at premium prices</p>
             </div>
-            
-            {loading ? (
-                <div className="flex justify-center items-center h-40">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold"></div>
-                </div>
-            ) : (
                 <div>
-                    {!success && <p className="text-center text-accent-red mb-4">Failed to retrieve auctions. Please try again.</p>}
+                    {!loading && !success && <p className="text-center text-accent-red mb-4">Failed to retrieve auctions. Please try again.</p>}
 
                     {/* Auctions grid */}
                     <div className="mb-10">
@@ -64,8 +98,14 @@ const Catalog = () => {
                             </div>
                         )}
                     </div>
+
+                    {loading ? (
+                        <div className="flex justify-center items-center h-40">
+                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold"></div>
+                        </div>
+                    ) : <Button onClick={() => {setOffset((offset + limit)); loadMore();}}>
+                    View {limit} More Results</Button>}
                 </div>
-            )}
         </div>
     )
 }

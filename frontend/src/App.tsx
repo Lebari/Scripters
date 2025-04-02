@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import {Routes, Route, Navigate} from "react-router-dom";
 import Login from "./pages/Login.tsx";
 import Catalog from "./pages/Catalog.tsx";
 import Sidebar from "./components/Sidebar.tsx";
@@ -14,12 +14,14 @@ import axios from "axios";
 import { useTokenContext } from "./components/TokenContext.tsx";
 import Upload from "./pages/Upload.tsx";
 import AuctionPage from "./pages/AuctionPage.tsx";
-import UC7UpdateDutchPage from "./pages/UC7UpdateDutchPage.tsx";
+import UC7UpdateDutchPage from "./pages/MyAuctions.tsx";
 import { NotificationProvider } from "./components/NotificationContext.tsx";
 import NotificationCenter from "./components/NotificationCenter.tsx";
 import { SocketProvider } from "./components/SocketContext.tsx";
 import Payment from "./pages/Payment.tsx";
 import Receipt from "./pages/Receipt.tsx";
+import Footer from "./components/Footer.tsx";
+import EditAuctionPage from "./pages/EditAuctionPage.tsx";
 
 function App() {
     const { user, setUser, token } = useTokenContext();
@@ -85,35 +87,69 @@ function App() {
                     </div>
 
                     {/* Sidebar */}
-                    <div className={`fixed inset-y-0 left-0 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out z-30 bg-black-800 min-h-screen pt-[56px]`} style={{ width: "250px" }}>
+                    <div className={`fixed inset-y-0 left-0 max-h-screen overflow-y-auto transform 
+                        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
+                        transition-transform duration-300 ease-in-out z-30 bg-black-800 min-h-screen pt-[56px]`}
+                         style={{ width: "250px" }}>
                         <Sidebar closeSidebar={toggleSidebar} />
                     </div>
 
                     {/* Main Content */}
                     <div
-                        className="flex flex-col pb-16 px-4 md:px-8 gap-4 min-h-screen flex-grow bg-gradient-to-br from-black to-black-700 transition-all duration-300 ease-in-out ml-0"
+                        className="flex flex-col py-16 px-4 md:px-8 gap-4 min-h-screen flex-grow bg-gradient-to-br
+                        from-black to-black-700 transition-all duration-300 ease-in-out ml-0"
                         style={{
-                            paddingTop: '72px',
+                            paddingTop: '10%',
                             marginLeft: sidebarOpen ? '250px' : '0',
                             width: sidebarOpen ? 'calc(100% - 250px)' : '100%',
                         }}
                     >
                         <Routes>
                             <Route index element={<Catalog />} />
-                            <Route path={import.meta.env.VITE_APP_CATALOG_URL} element={<Catalog />} />
-                            <Route path={`${import.meta.env.VITE_APP_CATALOG_URL}/:name`} element={<AuctionPage />} />
-                            <Route path={import.meta.env.VITE_APP_SIGNUP_URL} element={<SignUp />} />
-                            <Route path={import.meta.env.VITE_APP_LOGIN_URL} element={<Login />} />
-                            <Route path={import.meta.env.VITE_APP_LOGOUT_URL} element={<Logout />} />
-                            <Route path={import.meta.env.VITE_APP_UPLOAD_URL} element={<Upload />} />
-                            <Route path={import.meta.env.VITE_APP_SEARCH_URL} element={<AuctionSearchDisplay />} />
-                            <Route path={import.meta.env.VITE_APP_UC31FWDBIDDING_URL} element={<ForwardBidding />} />
-                            <Route path={import.meta.env.VITE_APP_UC32DCHBIDDING_URL} element={<DutchBidding />} />
-                            <Route path="/auction-ended" element={<AuctionEnded />} />
-                            <Route path={import.meta.env.VITE_APP_UPDATE_URL} element={<UC7UpdateDutchPage />} />
-                            <Route path={import.meta.env.VITE_APP_UC5PAY_URL || "/payment"} element={<Payment />} />
-                            <Route path="/receipt" element={<Receipt />} />
+
+                            {!token && token !== ""?
+                                <>
+                                    <Route path={import.meta.env.VITE_APP_LOGIN_URL} element={<Login />} />
+                                    <Route path={import.meta.env.VITE_APP_SIGNUP_URL} element={<SignUp />} />
+                                    <Route path={import.meta.env.VITE_APP_LOGOUT_URL} element={<Logout />} />
+                                    <Route path={import.meta.env.VITE_APP_CATALOG_URL} element={<Catalog />} />
+
+                                    {/*if not signed in, let privileged pages redirect to log in*/}
+                                    <Route path={import.meta.env.VITE_APP_UPLOAD_URL} element={<Navigate to={import.meta.env.VITE_APP_LOGIN_URL} replace />}  />
+                                    <Route path={import.meta.env.VITE_APP_UC31FWDBIDDING_URL} element={<Navigate to={import.meta.env.VITE_APP_LOGIN_URL} replace />}  />
+                                    <Route path={import.meta.env.VITE_APP_UC32DCHBIDDING_URL} element={<Navigate to={import.meta.env.VITE_APP_LOGIN_URL} replace />}  />
+                                    <Route path={import.meta.env.VITE_APP_UC4END_URL} element={<Navigate to={import.meta.env.VITE_APP_LOGIN_URL} replace />}  />
+                                    <Route path={import.meta.env.VITE_APP_ME_URL} element={<Navigate to={import.meta.env.VITE_APP_LOGIN_URL} replace />}  />
+                                    <Route path={`${import.meta.env.VITE_APP_DCH_UPDATE_URL}/:name`} element={<Navigate to={import.meta.env.VITE_APP_LOGIN_URL} replace />}  />
+                                    <Route path={`${import.meta.env.VITE_APP_FWD_UPDATE_URL}/:name`} element={<Navigate to={import.meta.env.VITE_APP_LOGIN_URL} replace />}  />
+                                    <Route path={import.meta.env.VITE_APP_UC5PAY_URL} element={<Navigate to={import.meta.env.VITE_APP_LOGIN_URL} replace />}  />
+                                    <Route path={`${import.meta.env.VITE_APP_UC6RECEIPT_URL}/:id`} element={<Navigate to={import.meta.env.VITE_APP_LOGIN_URL} replace />}  />
+                                </>
+                                :
+                                <>
+                                    <Route path={import.meta.env.VITE_APP_LOGOUT_URL} element={<Logout />} />
+                                    <Route path={import.meta.env.VITE_APP_CATALOG_URL} element={<Catalog />} />
+                                    <Route path={`${import.meta.env.VITE_APP_CATALOG_URL}/:name`} element={<AuctionPage />} />
+                                    <Route path={import.meta.env.VITE_APP_UPLOAD_URL} element={<Upload />} />
+                                    <Route path={import.meta.env.VITE_APP_SEARCH_URL} element={<AuctionSearchDisplay />} />
+                                    <Route path={import.meta.env.VITE_APP_UC31FWDBIDDING_URL} element={<ForwardBidding />} />
+                                    <Route path={import.meta.env.VITE_APP_UC32DCHBIDDING_URL} element={<DutchBidding />} />
+                                    <Route path={import.meta.env.VITE_APP_UC4END_URL} element={<AuctionEnded />} />
+                                    <Route path={import.meta.env.VITE_APP_ME_URL} element={<UC7UpdateDutchPage />} />
+                                    <Route path={`${import.meta.env.VITE_APP_DCH_UPDATE_URL}/:name`} element={<EditAuctionPage />} />
+                                    <Route path={`${import.meta.env.VITE_APP_FWD_UPDATE_URL}/:name`} element={<EditAuctionPage />} />
+                                    <Route path={import.meta.env.VITE_APP_UC5PAY_URL } element={<Payment />} />
+                                    <Route path={`${import.meta.env.VITE_APP_UC6RECEIPT_URL}/:id`} element={<Receipt />} />
+
+                                    {/*if signed in, let log in and sign up redirect to catalog page*/}
+                                    <Route path={import.meta.env.VITE_APP_LOGIN_URL} element={<Navigate to={import.meta.env.VITE_APP_CATALOG_URL} replace />} />
+                                    <Route path={import.meta.env.VITE_APP_SIGNUP_URL} element={<Navigate to={import.meta.env.VITE_APP_CATALOG_URL} replace />} />
+                                </>
+
+                            }
                         </Routes>
+
+                        <Footer/>
                     </div>
 
                     <NotificationCenter />

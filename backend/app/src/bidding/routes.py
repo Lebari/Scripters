@@ -1,16 +1,35 @@
 from . import bidding
 from flask import jsonify, abort, request
 from ...models import *
-from database import *
 from datetime import datetime
 from flask_jwt_extended import current_user, jwt_required
-import json
+
+
+@bidding.route('/<slug>/highestBid', methods=['GET'])
+@jwt_required()
+def get_highest_bid(slug):
+    print("hello from get_highest_bid")
+    auction = Auction.objects(slug=slug).first()
+
+    if not auction:
+        abort(404, description="Auction not found.")
+    if not auction.is_active:
+        return jsonify({"error": "Auction is no longer active."}), 400
+
+    try:
+        # get auction's event for latest bid
+        print("latest_bid")
+        latest_bid = auction.event.price
+        return jsonify({"price": latest_bid}), 201
+    except:
+
+        print("no latest_bid")
+        return jsonify({"price": auction.item.price}), 201
+
 
 @bidding.route('/forward/<slug>', methods=['POST'])
 @jwt_required()
 def bid_forward(slug):
-    user = current_user
-
     auction = Auction.objects(slug=slug).first()
 
     if not auction:
@@ -22,7 +41,7 @@ def bid_forward(slug):
     data = request.get_json()
     if not data or "price" not in data:
         return jsonify({"error": "Missing price in request payload."}), 400
-    
+
     # Get the bid price and ensure it's an integer
     try:
         bid_price = int(data["price"])
@@ -31,29 +50,31 @@ def bid_forward(slug):
     except (ValueError, TypeError):
         return jsonify({"error": "Bid price must be a valid number."}), 400
 
+    print(auction.event)
     if(not auction.event is None and bid_price <= auction.event.price):
         return jsonify({"error": "New bid must be higher than the old bid."}), 400
 
     # Mark the auction as inactive and update the timestamp
-    auction.date_updated = datetime.utcnow()
+    auction.date_updated = datetime.now()
     auction.save()
 
-    # Create a new Sale object.
+    # Create a new Bid object.
     bid = Bid(
-        user=user,           # logged in buyer
+        user=current_user,           # logged in buyer
         event_type=EventType.BID,   # type of event
-        time=datetime.utcnow(),
+        time=datetime.now(),
         price=bid_price,
         auction=auction,
     )
     bid.save()
-    auction.bids.append(bid)
+    auction.bids.append(bid.id)
 
     # Link the sale to the auction.
     auction.event = bid
     auction.save()
 
     return jsonify({"status": "success", "payment_url": "----"}), 200
+
 
 @bidding.route('/dutch/<slug>', methods=['POST'])
 @jwt_required()
@@ -64,7 +85,7 @@ def buyNow_Dutch(slug):
         if not auction:
             print(f"[DUTCH AUCTION] Error: Auction with slug {slug} not found")
             abort(404, description="Auction not found.")
-        
+
         if not auction.is_active:
             print(f"[DUTCH AUCTION] Error: Auction {slug} is no longer active")
             return jsonify({"error": "Auction is no longer active."}), 400
@@ -98,8 +119,8 @@ def buyNow_Dutch(slug):
         # We're skipping notifications for Dutch auctions as they go directly to the auction-ended page
         # Return successful response
         return jsonify({
-            "status": "success", 
-            "message": "Dutch auction completed successfully", 
+            "status": "success",
+            "message": "Dutch auction completed successfully",
             "auction_id": auction.get_id(),
             "auction_slug": auction.slug,
             "final_price": sale_price
@@ -111,15 +132,17 @@ def buyNow_Dutch(slug):
 
 @bidding.route("/dutch", methods=["GET"])
 def hello_bidding_dutch():
-    print("Hello from Auth")
+    print("Hello from hello_bidding_dutch")
     return jsonify({"message": "Hello from dutch bidding"}), 201
+
 
 @bidding.route("/forward", methods=["GET"])
 def hello_bidding_forward():
-    print("Hello from Auth")
+    print("Hello from hello_bidding_forward")
     return jsonify({"message": "Hello from forward bidding"}), 201
+
 
 @bidding.route("/", methods=["GET"])
 def hello_bidding():
-    print("Hello from Auth")
+    print("Hello from hello_bidding")
     return jsonify({"message": "Hello from bidding"}), 201

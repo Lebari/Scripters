@@ -15,45 +15,53 @@ const Login = () => {
     const goToCatalogPage = () => {
         if (isNavigating.current) return;
         isNavigating.current = true;
-        navigate(`/catalog`);
+        navigate(`${import.meta.env.VITE_APP_CATALOG_URL}`);
     };
+
+    const [failureMsg, setFailureMsg] = useState("Please check credentials and try again.");
+
+    const validateForm = (): boolean =>{
+        if (!loginForm.uname) { setFailureMsg("Name must be a non-empty string"); return false;}
+        if (!loginForm.pw) { setFailureMsg("Password must be a non-empty string"); return false;}
+        return true;
+    }
 
     const loginU = (event: React.FormEvent) =>{
         console.log(`user ${loginForm.uname} pw ${loginForm.pw}`)
-        axios({
-            baseURL: "http://localhost:5001",
-            url: "login",
-            method: "post",
-            data: {
-                username: loginForm.uname,
-                password: loginForm.pw
-            }
-        }).then(async (result) => {
-            console.log(result.data);
-            setToken(result.data.token);
-            setFailedLogin(false);
+        const valid = validateForm();
+        if (valid) {
+            axios({
+                baseURL: import.meta.env.VITE_API_URL,
+                url: "login",
+                method: "post",
+                data: {
+                    username: loginForm.uname,
+                    password: loginForm.pw
+                }
+            }).then(async (result) => {
+                console.log(result.data);
+                setToken(result.data.token);
+                setFailedLogin(false);
 
-            goToCatalogPage();
-        }).catch(async (error) => {
-            setFailedLogin(true);
-            if (error.response) {
-                console.log(error.response);
-                console.log(error.response.status);
-                console.log(error.response.headers);
-            }
-        });
+                goToCatalogPage();
+            }).catch(async (error) => {
+                setFailedLogin(true);
+                if (error.response) {
+                    console.log(error.response);
+                    console.log(error.response.status);
+                    console.log(error.response.headers);
+                }
+            });
 
-        setLoginForm(({
-            uname: "",
-            pw: ""
-        }));
+            setLoginForm(({
+                uname: "",
+                pw: ""
+            }));
+        }
 
         event.preventDefault();
     }
 
-    const logoutU = () =>{
-        window.location.href = import.meta.env.VITE_APP_LOGOUT_URL
-    }
     const updateForm = (event: React.ChangeEvent<HTMLInputElement>) => {
         // handle updating the loginForm state whenever a field changes
         const {value, name} = event.target
@@ -69,22 +77,21 @@ const Login = () => {
             <form>
                 <div className={"grid grid-cols-1 white max-w-md items-start"}>
                     <label htmlFor={"uname"}>Username</label>
-                    <input type={"text"} name={"uname"} value={loginForm.uname} onChange={updateForm}/>
+                    <input type={"text"} name={"uname"} value={loginForm.uname} onChange={updateForm} maxLength={50}/>
                     <label htmlFor={"pw"}>Password</label>
-                    <input type={"text"} name={"pw"} value={loginForm.pw} onChange={updateForm}/>
+                    <input type={"password"} name={"pw"} value={loginForm.pw} onChange={updateForm} maxLength={50}/>
 
                     <Button type={"submit"} name={"submit"} onClick={loginU}>Log In</Button>
                 </div>
             </form>
         {failedLogin?
-            <p className={"text-red-400"}>Please check credentials and try again.</p>
+            <p className={"text-red-400"}>{failureMsg}</p>
             : <></>
         }
         <div>
             <Button onClick={() => window.location.href = import.meta.env.VITE_APP_SIGNUP_URL }>
                 Go To Signup
             </Button>
-            <Button onClick={logoutU }>Logout</Button>
         </div>
         </div>
     )

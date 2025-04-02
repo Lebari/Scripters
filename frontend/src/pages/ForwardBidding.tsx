@@ -33,33 +33,17 @@ function ForwardBidding() {
         const auctionSlug = auction.slug || auction.raw?.slug || auction.id;
         
         console.log("Fetching current highest bid for auction slug:", auctionSlug);
-        
+
         // Fetch the auction details to get the current highest bid
         const response = await axios.get(
-          `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/catalog/${encodeURIComponent(auctionSlug)}`
+            `${import.meta.env.VITE_API_URL}/bid/${encodeURIComponent(auctionSlug)}/highestBid`
         );
-        
-        console.log("Auction details for bid:", response.data);
-        
-        if (response.data.auction) {
-          // In the backend, auction.event is set to the highest bid
-          // For forward auctions, the latest bid (highest price) becomes the auction.event
-          let highestBid = 0;
-          
-          // Check if there's an event (which would be the highest bid)
-          if (response.data.auction.event && response.data.auction.event.price) {
-            // This is the highest bid price
-            highestBid = Number(response.data.auction.event.price);
-            console.log("Found highest bid in auction.event:", highestBid);
-          } else {
-            // Fall back to item price if no bids yet
-            highestBid = Number(response.data.auction.item?.price || 0);
-            console.log("No bids yet, using item price:", highestBid);
-          }
-          
-          console.log("Setting current highest bid to:", highestBid);
-          setCurrentHighestBid(Number(highestBid));
+        if(response.data.price){
+          setCurrentHighestBid(Number(response.data.price));
         }
+
+        console.log("Auction details for bid:", response.data);
+
       } catch (err) {
         console.error("Error fetching current bid:", err);
       }
@@ -144,7 +128,7 @@ function ForwardBidding() {
     // Send bid to the backend
     axios
       .post(
-        `http://localhost:5001/bid/forward/${auctionSlug}`, 
+        `${import.meta.env.VITE_API_URL}/bid/forward/${auctionSlug}`,
         { price: numericBidPrice },
         {
           headers: {

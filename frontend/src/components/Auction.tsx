@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Auction as AuctionType } from "../models.ts";
 import Button from "./Button.tsx";
+import {useTokenContext} from "./TokenContext.tsx";
 
 interface CatalogItemProps {
     auction: AuctionType;
@@ -11,11 +12,19 @@ interface CatalogItemProps {
 const Auction: React.FC<CatalogItemProps> = ({ auction, btnLabel }) => {
     const navigate = useNavigate();
     const isNavigating = useRef(false);
+    const { user } = useTokenContext();
 
     const detailClick = () => {
         if (isNavigating.current) return;
         isNavigating.current = true;
-        navigate(`/catalog/${encodeURIComponent(auction.slug)}`, { state: auction });
+
+        // don't let owners of auctions bid on their own auction
+        if (user.username == auction.seller.username) {
+            if (auction.auction_type == "Dutch") navigate(`${import.meta.env.VITE_APP_DCH_UPDATE_URL}/${encodeURIComponent(auction.slug)}`, { state: auction });
+            else navigate(`${import.meta.env.VITE_APP_FWD_UPDATE_URL}/${encodeURIComponent(auction.slug)}`, { state: auction });
+        }
+
+        else navigate(`${import.meta.env.VITE_APP_CATALOG_URL}/${encodeURIComponent(auction.slug)}`, { state: auction });
     };
 
     return (
@@ -48,7 +57,7 @@ const Auction: React.FC<CatalogItemProps> = ({ auction, btnLabel }) => {
                 <div className="border-t border-gray-800 pt-4 mb-4">
                     <div className="flex justify-between mb-2">
                         <span className="text-sm text-gray-400">Duration:</span>
-                        <span className="text-sm text-gray-300">{auction.duration} hours</span>
+                        <span className="text-sm text-gray-300">{auction.duration} mins</span>
                     </div>
                     
                     <div className="flex justify-between mb-2">

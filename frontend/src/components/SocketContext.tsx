@@ -19,7 +19,7 @@ interface SocketProviderProps {
 // Create the provider component
 export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
-  const { user, token } = useTokenContext();
+  const { user } = useTokenContext();
   const { notifyAuctionWon } = useNotificationHelpers();
   
   // Track processed notification events to prevent duplicates
@@ -183,7 +183,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
         const auctionSlug = data.auction_slug;
         console.log(`Fetching auction details by slug: ${auctionSlug}`);
         
-        fetch(`http://localhost:5001/catalog/${auctionSlug}`)
+        fetch(`${import.meta.env.VITE_API_URL}/catalog/${auctionSlug}`)
           .then(res => {
             console.log('Auction details response status:', res.status);
             if (!res.ok) {
@@ -277,7 +277,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
         // Otherwise fetch the auction data using slug
         else if (data.auction_slug) {
           console.log(`Fetching auction details by slug: ${data.auction_slug}`);
-          fetch(`http://localhost:5001/catalog/${data.auction_slug}`)
+          fetch(`${import.meta.env.VITE_API_URL}/catalog/${data.auction_slug}`)
             .then(res => {
               if (!res.ok) {
                 throw new Error(`Failed to fetch auction details with status: ${res.status}`);

@@ -4,7 +4,7 @@ from ...models import User
 from flask import jsonify, request
 from ..validations import validate_new_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_jwt_extended import unset_jwt_cookies, create_access_token, jwt_required, current_user
+from flask_jwt_extended import unset_jwt_cookies, create_access_token, jwt_required
 
 
 @auth.route("/signup", methods=["POST"])
@@ -34,7 +34,7 @@ def signup():
         )
         new_user.save()
 
-        return jsonify({"message": "New user created"}), 201
+        return jsonify({"message": "New user created. Please sign in."}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
@@ -57,19 +57,4 @@ def login():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-
-@auth.route("/logout", methods=["POST"])
-@jwt_required()
-def logout():
-    print("Hello from logout")
-    try:
-        token = request.headers.get("Authorization").split(" ")[1]
-
-        print(f"current_user.username {current_user}")
-
-        response = jsonify({"message": "Sign out successful"})
-        unset_jwt_cookies(response)
-        return response, 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
 

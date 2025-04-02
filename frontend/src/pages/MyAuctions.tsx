@@ -8,22 +8,30 @@ import axios from "axios";
 export const MyAuctions = () =>{
     const [catalog, setCatalogsList] = useState([]);
     const [success, setSuccess] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     const getAllAuctions = () =>{
+        setLoading(true);
         axios({
-            baseURL: "http://localhost:5001",
-            url: "myauctions",
+            baseURL: import.meta.env.VITE_API_URL,
+            url: "me",
             method: "get",
+            data:{
+                limit: 30,
+                offset: 0
+            }
         }).then((result) => {
             console.log(result);
             setSuccess(true);
             setCatalogsList(result.data.auctions);
+            setLoading(false);
         }).catch((error) => {
             if (error.response) {
                 console.log(error.response);
                 console.log(error.response.status);
                 console.log(error.response.headers);
             }
+            setLoading(false);
         });
     }
     useEffect(()=>{getAllAuctions();}, []);
@@ -33,17 +41,21 @@ export const MyAuctions = () =>{
         <div className={"flex flex-col items-center gap-4"}>
             <h1>Your Auctions</h1>
             <div>
-                {success? <></>
-                    : <>Auctions not retrieved.</>}
-
-                {/* Auctions grid */}
-                <div className="mb-10">
-                    <div className="grid gap-4 grid-cols-3">
-                        {catalog.map((auction: AuctionType) => (
-                            <Auction key={auction.id} auction={auction}/>
-                        ))}
+                {loading ? (
+                    <div className="flex justify-center items-center h-40">
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold"></div>
                     </div>
-                </div>
+                ) : (
+                    <div className="mb-10">
+                        {!success && <p className="text-center text-accent-red mb-4">Failed to retrieve auctions. Please try again.</p>}
+                    {/* Auctions grid */}
+                        <div className="grid gap-4 grid-cols-3">
+                            {catalog.map((auction: AuctionType) => (
+                                <Auction key={auction.id} auction={auction} btnLabel={"Edit Auction"}/>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     )

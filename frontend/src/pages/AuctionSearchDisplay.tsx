@@ -55,18 +55,28 @@ function AuctionSearchDisplay() {
   // 2. Fetch all auctions on mount
   useEffect(() => {
     setLoading(true);
-    axios
-      .get("http://localhost:5001/search/")
-      .then((res) => {
-        if (res.data.status === "success" && res.data.auctions) {
-          // Filter for active auctions only
-          const activeAuctions = res.data.auctions.filter((auction: RawAuction) => auction.is_active);
-          const normalized = activeAuctions.map((rawAuc: RawAuction) => normalizeAuction(rawAuc));
-          setDisplayedAuctions(normalized);
-        }
-      })
-      .catch((error) => console.error("Error fetching auctions:", error))
-      .finally(() => setLoading(false));
+    axios({
+      baseURL: import.meta.env.VITE_API_URL,
+      url: "/search",
+      method: "post",
+      params:{
+        active: 1
+      }
+    }).then((result) => {
+      console.log(result);
+      const activeAuctions = result.data.auctions;
+      const normalized = activeAuctions.map((rawAuc: RawAuction) => normalizeAuction(rawAuc));
+      setDisplayedAuctions(normalized);
+      setLoading(false);
+    }).catch((error) => {
+      console.error("Error searching auctions:", error);
+      if (error.response) {
+        console.log(error.response);
+        console.log(error.response.status);
+        console.log(error.response.headers);
+      }
+      setLoading(false);
+    });
   }, []);
 
   // 3. Searching (GET if keyword empty, else POST), then normalize
@@ -81,34 +91,33 @@ function AuctionSearchDisplay() {
       return list.filter((a) => a.auctionType === auctionType);
     };
 
-    if (keyword.trim() === "") {
-      axios
-        .get("http://localhost:5001/search/")
-        .then((res) => {
-          if (res.data.status === "success" && res.data.auctions) {
-            // Filter for active auctions only
-            const activeAuctions = res.data.auctions.filter((auction: RawAuction) => auction.is_active);
-            const normalized = activeAuctions.map((rawAuc: RawAuction) => normalizeAuction(rawAuc));
-            setDisplayedAuctions(applyTypeFilter(normalized));
-          }
-        })
-        .catch((err) => console.error("Error fetching auctions:", err))
-        .finally(() => setLoading(false));
-    } else {
-      axios
-        .post("http://localhost:5001/search/", { keyword: keyword.trim() })
-        .then((res) => {
-          if (res.data.status === "success" && res.data.results) {
-            // Filter for active auctions only
-            const activeAuctions = res.data.results.filter((auction: RawAuction) => auction.is_active);
-            const normalized = activeAuctions.map((rawAuc: RawAuction) => normalizeAuction(rawAuc));
-            setDisplayedAuctions(applyTypeFilter(normalized));
-          }
-        })
-        .catch((err) => console.error("Error searching auctions:", err))
-        .finally(() => setLoading(false));
-    }
+    if (keyword.trim() !== "") {
+      // get only active auctions
+      axios({
+        baseURL: import.meta.env.VITE_API_URL,
+        url: "/search/",
+        method: "post",
+        params:{
+          active: 1,
+          keyword: keyword.trim()
+        }
+      }).then((result) => {
+        console.log(result);
+        const activeAuctions = result.data.auctions;
+        const normalized = activeAuctions.map((rawAuc: RawAuction) => normalizeAuction(rawAuc));
+        setDisplayedAuctions(applyTypeFilter(normalized));
+        setLoading(false);
+      }).catch((error) => {
+        console.error("Error searching auctions:", error);
+        if (error.response) {
+          console.log(error.response);
+          console.log(error.response.status);
+          console.log(error.response.headers);
+        }
+        setLoading(false);
+      });
   };
+  }
 
   // 4. Single Bid button
   const handleBid = () => {
@@ -141,6 +150,7 @@ function AuctionSearchDisplay() {
             placeholder="Enter keyword..."
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
+            maxLength={50}
           />
         </div>
 
@@ -195,6 +205,7 @@ function AuctionSearchDisplay() {
                         name="selectedAuction"
                         checked={selectedAuctionId === auction.id}
                         onChange={() => {}}
+                        maxLength={50}
                       />
                     </td>
                   </tr>
