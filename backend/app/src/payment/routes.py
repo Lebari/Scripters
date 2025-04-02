@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required, current_user
 from bson import ObjectId
 from ...models import Payment, Auction, Event
 from datetime import datetime
+import uuid
 
 payment_bp = Blueprint("payment", __name__)
 
@@ -37,7 +38,7 @@ def process_payment():
         if not event_object:
             return jsonify({"error": "Winning bid event not found"}), 404
         
-        if str(event_object.user.id) == str(current_user.id):
+        if str(event_object.user.id) != str(current_user.id):
             return jsonify({"error": "You are not the owner who won this bid"}), 403
 
         shipping_address = f"{current_user.streetno} {current_user.street}, {current_user.city}, {current_user.country} {current_user.postal}" 
@@ -58,7 +59,7 @@ def process_payment():
 
         return jsonify({
             "message": "Auction is inactive. Payment completed successfully.",
-            "payment_id": str(payment.id),
+            "payment_id": payment.payment_id,
             "payment": payment.to_json(),
             "user_purchases": [str(p) for p in current_user.purchases]
         })
