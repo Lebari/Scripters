@@ -61,48 +61,34 @@ def process_payment():
             "message": "Auction is inactive. Payment completed successfully.",
             "payment_id": payment.payment_id,
             "payment": payment.to_json(),
-            "user_purchases": [str(p) for p in current_user.purchases]
+            "user_purchases": [p.payment_id for p in current_user.purchases]
         })
     
     except Exception as e:
         print(f"Payment processing error: {str(e)}")
         return jsonify({"error": str(e)}), 400
 
-@payment_bp.route("/receipt", methods=["POST"])
+
+@payment_bp.route("/receipt", methods=["GET"])
 @jwt_required()
-def generate_receipt():
-    """Generate a receipt for a completed payment"""
+def generate_latest_receipt():
     try:
-        data = request.get_json()
-        if "purchase_id" not in data:
-            return jsonify({"error": "Missing purchase_id"}), 400
+        if not current_user.purchases:
+            return jsonify({"error": "You have no purchases"}), 404
 
-        purchase_id = data["purchase_id"]
-        dbref_list = current_user.purchases
-        id_found = None
-        for ref in dbref_list:
-            if str(ref.id) == str(purchase_id):
-                id_found = str(ref.id)
-                break
-
-        if not id_found:
-            return jsonify({"error": "Purchase ID not found in user's purchases"}), 404
-        
-        payment = Payment.objects(id=id_found).first()
-        if not payment:
-            return jsonify({"error": "Payment record not found"}), 404
+        latest_payment = current_user.purchases[-1]
 
         receipt = {
-            "purchase_id": id_found,
+            "purchase_id": latest_payment.payment_id,
             "user_name": f"{current_user.fname} {current_user.lname}",
-            "auction_id": str(payment.auction.id),
-            "amount_paid": payment.amount,
-            "shipping_address": payment.shipping_address,
-            "delivery_estimate": f"{7} business days"
+            "auction_id": str(latest_payment.auction.id),
+            "amount_paid": latest_payment.amount,
+            "shipping_address": latest_payment.shipping_address,
+            "delivery_estimate": "7 business days"
         }
 
         return jsonify({
-            "message": "Purchase Receipt",
+            "message": "Latest Purchase Receipt",
             "receipt": receipt
         })
 

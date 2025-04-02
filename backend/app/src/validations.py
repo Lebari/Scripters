@@ -44,7 +44,7 @@ def validate_new_auction(f):
             return jsonify({"message": "Category must be a string"}), 400
         if Auction.objects(slug=slug).first() is not None:
             return jsonify({"message": "Slug must be unique"}), 400
-        if (auction_type != AuctionType.DUTCH) and (auction_type != AuctionType.FORWARD.value):
+        if (auction_type != AuctionType.DUTCH) and (auction_type != AuctionType.FORWARD):
             return jsonify({"message": "Type must be 'Dutch' or 'Forward'"}), 400
         return f(*args, **kwargs)
 

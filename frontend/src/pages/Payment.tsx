@@ -51,11 +51,12 @@ const Payment = () => {
         }
       );
 
-      const purchaseId = response.data.payment_id;
+      const purchaseId = response.data.payment.payment_id;
 
       navigate('/receipt', {
-        state: { purchaseId: response.data.payment_id }
+        state: { purchaseId }
       });
+      
       
     } catch (err: any) {
       console.error("Payment error:", err);
