@@ -1,6 +1,8 @@
 # Scripters Auction
 Welcome to our Auction Project for EECS4413 W25.
 
+View the project on GitHub at [https://github.com/Lebari/Scripters](https://github.com/Lebari/Scripters)
+
 ## Team Members
 - Greatlove Bariboloka
 - Shaylin Ziaei
