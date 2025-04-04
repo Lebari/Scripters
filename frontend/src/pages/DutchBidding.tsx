@@ -131,7 +131,7 @@ function DutchBidding() {
         Auction Slug: {auctionData?.slug || auctionData?.raw?.slug || auctionData?.id || "Not available"}
       </p>
       <div className="bidding-card">
-        <h3 className="bidding-item-name">{auctionData.item.name || (auctionData.raw?.item?.name) || "Unnamed Item"}</h3>
+        <h3 className="bidding-item-name">{auctionData.name || (auctionData.raw?.item?.name) || "Unnamed Item"}</h3>
         <p className="bidding-current-bid">
           <strong>Current Price:</strong> ${currentPrice.toFixed(2)}
         </p>

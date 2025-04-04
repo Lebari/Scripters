@@ -133,7 +133,7 @@ function App() {
                                     <Route path={`${import.meta.env.VITE_APP_DCH_UPDATE_URL}/:name`} element={<Navigate to={import.meta.env.VITE_APP_LOGIN_URL} replace />}  />
                                     <Route path={`${import.meta.env.VITE_APP_FWD_UPDATE_URL}/:name`} element={<Navigate to={import.meta.env.VITE_APP_LOGIN_URL} replace />}  />
                                     <Route path={import.meta.env.VITE_APP_UC5PAY_URL} element={<Navigate to={import.meta.env.VITE_APP_LOGIN_URL} replace />}  />
-                                    <Route path={`${import.meta.env.VITE_APP_UC6RECEIPT_URL}/:id`} element={<Navigate to={import.meta.env.VITE_APP_LOGIN_URL} replace />}  />
+                                    <Route path={`${import.meta.env.VITE_APP_UC6RECEIPT_URL}`} element={<Navigate to={import.meta.env.VITE_APP_LOGIN_URL} replace />}  />
                                 </>
                                 :
                                 <>
@@ -149,7 +149,7 @@ function App() {
                                     <Route path={`${import.meta.env.VITE_APP_DCH_UPDATE_URL}/:name`} element={<EditAuctionPage />} />
                                     <Route path={`${import.meta.env.VITE_APP_FWD_UPDATE_URL}/:name`} element={<EditAuctionPage />} />
                                     <Route path={import.meta.env.VITE_APP_UC5PAY_URL } element={<Payment />} />
-                                    <Route path={`${import.meta.env.VITE_APP_UC6RECEIPT_URL}/:id`} element={<Receipt />} />
+                                    <Route path={`${import.meta.env.VITE_APP_UC6RECEIPT_URL}`} element={<Receipt />} />
 
                                     {/*if signed in, let log in and sign up redirect to catalog page*/}
                                     <Route path={import.meta.env.VITE_APP_LOGIN_URL} element={<Navigate to={import.meta.env.VITE_APP_CATALOG_URL} replace />} />

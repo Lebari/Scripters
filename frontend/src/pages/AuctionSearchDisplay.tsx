@@ -134,6 +134,7 @@ function AuctionSearchDisplay() {
     } else if (selectedAuction.auctionType === "Dutch") {
       // Pass the auction (which now includes the current bid, i.e. item.price) to DutchBidding
       navigate(import.meta.env.VITE_APP_UC32DCHBIDDING_URL, { state: { auction: selectedAuction } });
+      console.log("hekrhasehfshf")
     } else {
       console.log("Unknown auction type:", selectedAuction.auctionType);
     }

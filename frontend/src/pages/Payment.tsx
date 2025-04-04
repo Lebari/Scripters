@@ -39,7 +39,7 @@ const Payment = () => {
       const token = localStorage.getItem("token");
 
       const response = await axios.post(
-          `http://localhost:5001/payment`,
+          `http://localhost:5001/payment/`,
           {
             ...paymentData,
           },
@@ -53,7 +53,7 @@ const Payment = () => {
 
       const purchaseId = response.data.payment.payment_id;
 
-      navigate('/receipt', {
+      navigate(`${import.meta.env.VITE_APP_UC6RECEIPT_URL}`, {
         state: { purchaseId }
       });
 

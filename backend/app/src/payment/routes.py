@@ -1,18 +1,17 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, current_user
 from bson import ObjectId
+from . import payment_bp
 from ...models import Payment, Auction, Event
 from datetime import datetime
 import uuid
-
-payment_bp = Blueprint("payment", __name__)
 
 @payment_bp.route("/test", methods=["GET"])
 def test_payment():
     """Test endpoint to check if the payment service is running"""
     return jsonify({"message": "Hi"}), 200
 
-@payment_bp.route("/payment", methods=["POST"])
+@payment_bp.route("/", methods=["POST"])
 @jwt_required(locations="headers")
 def process_payment():
     print("hello from process_payment")
