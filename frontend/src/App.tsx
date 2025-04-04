@@ -1,4 +1,4 @@
-import {Routes, Route, Navigate} from "react-router-dom";
+import {Routes, Route, Navigate, useNavigate} from "react-router-dom";
 import Login from "./pages/Login.tsx";
 import Catalog from "./pages/Catalog.tsx";
 import Sidebar from "./components/Sidebar.tsx";
@@ -8,7 +8,7 @@ import AuctionSearchDisplay from "./pages/AuctionSearchDisplay.tsx";
 import ForwardBidding from "./pages/ForwardBidding.tsx";
 import DutchBidding from "./pages/DutchBidding.tsx";
 import AuctionEnded from "./pages/AuctionEnded.tsx";
-import { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import axios from "axios";
 
 import { useTokenContext } from "./components/TokenContext.tsx";
@@ -24,6 +24,7 @@ import Footer from "./components/Footer.tsx";
 import EditAuctionPage from "./pages/EditAuctionPage.tsx";
 
 function App() {
+    const navigate = useNavigate();
     const { user, setUser, token } = useTokenContext();
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [isMobile, setIsMobile] = useState(false);
@@ -65,7 +66,7 @@ function App() {
             <SocketProvider>
                 <div className="min-h-screen flex flex-col md:flex-row bg-black text-gray-100">
                     {/* Header */}
-                    <div className="fixed top-0 left-0 right-0 z-40 bg-black border-b border-gold/10 py-3 px-4 flex justify-between items-center shadow-md">
+                    <div className="fixed top-0 left-0 right-0 z-40 gap-4 bg-black border-b border-gold/10 py-3 px-4 flex justify-between items-center shadow-md">
                         <button
                             className="p-2 bg-gold rounded-md text-black hover:bg-gold-light transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-gold-dark focus:ring-opacity-50"
                             onClick={toggleSidebar}
@@ -75,6 +76,13 @@ function App() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sidebarOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
                             </svg>
                         </button>
+                        <button
+                            className="p-2 bg-gold rounded-md text-black hover:bg-gold-light transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-gold-dark focus:ring-opacity-50"
+                            aria-label="Toggle menu"
+                            onClick={() => {navigate(-1);}}>
+                            Back
+                        </button>
+
                         <div className="ml-4 flex-1 text-center md:text-right">
                             <p className="text-sm md:text-base">
                                 User: {user.username ? (
@@ -113,6 +121,8 @@ function App() {
                                     <Route path={import.meta.env.VITE_APP_SIGNUP_URL} element={<SignUp />} />
                                     <Route path={import.meta.env.VITE_APP_LOGOUT_URL} element={<Logout />} />
                                     <Route path={import.meta.env.VITE_APP_CATALOG_URL} element={<Catalog />} />
+                                    <Route path={`${import.meta.env.VITE_APP_CATALOG_URL}/:name`} element={<AuctionPage />} />
+                                    <Route path={import.meta.env.VITE_APP_SEARCH_URL} element={<AuctionSearchDisplay />} />
 
                                     {/*if not signed in, let privileged pages redirect to log in*/}
                                     <Route path={import.meta.env.VITE_APP_UPLOAD_URL} element={<Navigate to={import.meta.env.VITE_APP_LOGIN_URL} replace />}  />

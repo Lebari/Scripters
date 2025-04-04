@@ -127,14 +127,14 @@ export const useNotificationHelpers = () => {
     return addNotification({
       type: 'success',
       title: 'Auction Won!',
-      message: `Congratulations! You've won the auction for ${normalizedAuction.name}!`,
+      message: `Hurray! User ${user.username} won the auction for ${normalizedAuction.name}!`,
       actionText: 'View Details',
       actionData: { auction: normalizedAuction, isWinner: true, finalPrice, user },
       actionCallback: () => {
         // Explicitly include the user and ensure finalPrice is a number
         const numericFinalPrice = Number(finalPrice);
         console.log('Navigating to auction-ended with price:', numericFinalPrice);
-        navigate('/auction-ended', { 
+        navigate(import.meta.env.VITE_APP_UC4END_URL, {
           state: { 
             auction: normalizedAuction, 
             isWinner: true,

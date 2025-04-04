@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Auction as AuctionType } from "../models.ts";
 import Button from "./Button.tsx";
@@ -14,6 +14,62 @@ const Auction: React.FC<CatalogItemProps> = ({ auction, btnLabel }) => {
     const isNavigating = useRef(false);
     const { user } = useTokenContext();
 
+    const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number }>({
+        days: 0,
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+    });
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (auction) {
+                const now = new Date();
+                const addedDate = new Date(auction.date_added);
+                // Add the duration in minutes to the past date
+                addedDate.setMinutes(addedDate.getMinutes() + auction.duration);
+                const difference = addedDate.getTime() - now.getTime();
+
+                if (isNaN(addedDate.getTime())) {
+                    console.log('Invalid date and time.');
+                    return "";
+                }
+
+                if (difference <= 0) {
+                    clearInterval(interval);
+                    setTimeLeft({days: 0, hours: 0, minutes: 0, seconds: 0});
+                } else {
+                    const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+                    setTimeLeft({days, hours, minutes, seconds});
+                }
+            }
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [new Date()]);
+
+    function getTimeLeft():string {
+        const days = timeLeft.days;
+        const hours = timeLeft.hours;
+        const minutes = timeLeft.minutes;
+        const seconds = timeLeft.seconds;
+
+        let formattedDate = `${days} days, ${hours} hrs, ${minutes} mins, ${seconds} secs`;
+        if (days == 0) {
+            formattedDate = `${hours} hrs, ${minutes} mins, ${seconds} secs`;
+            if (hours == 0) {
+                formattedDate = `${minutes} mins, ${seconds} secs`;
+                if (minutes == 0) formattedDate = `${seconds} secs`;
+            }
+        }
+        return formattedDate;
+    }
+
+
     const detailClick = () => {
         if (isNavigating.current) return;
         isNavigating.current = true;
@@ -26,6 +82,7 @@ const Auction: React.FC<CatalogItemProps> = ({ auction, btnLabel }) => {
 
         else navigate(`${import.meta.env.VITE_APP_CATALOG_URL}/${encodeURIComponent(auction.slug)}`, { state: auction });
     };
+
 
     return (
         <div 
@@ -56,8 +113,8 @@ const Auction: React.FC<CatalogItemProps> = ({ auction, btnLabel }) => {
 
                 <div className="border-t border-gray-800 pt-4 mb-4">
                     <div className="flex justify-between mb-2">
-                        <span className="text-sm text-gray-400">Duration:</span>
-                        <span className="text-sm text-gray-300">{auction.duration} mins</span>
+                        <span className="text-sm text-gray-400">Time Left:</span>
+                        <span className="text-sm text-gray-300">{getTimeLeft()}</span>
                     </div>
                     
                     <div className="flex justify-between mb-2">

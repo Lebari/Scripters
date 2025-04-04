@@ -136,6 +136,11 @@ def update_auction(slug):
         if not item:
             return jsonify({"error": "Item not found."}), 404
 
+        # if auction is dutch, the new price must be more than the old
+
+        if auction.auction_type == AuctionType.DUTCH and new_price < item.price:
+            return jsonify({"error": "New Dutch Auction price must be greater."}), 400
+
         # update item and auction
         item.name = new_name
         item.price = new_price

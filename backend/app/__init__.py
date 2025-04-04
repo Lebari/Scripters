@@ -79,14 +79,14 @@ def create_app():
         try:
             test_data = {
                 'test': True,
-                'timestamp': datetime.utcnow().timestamp(),
+                'timestamp': datetime.now().timestamp(),
                 'message': f"Test {notification_type} notification"
             }
 
             if notification_type == 'auction_expired':
                 test_data['auction_id'] = 'test_id'
                 test_data['auction_slug'] = 'test_slug'
-                test_data['expired_at'] = datetime.utcnow().timestamp()
+                test_data['expired_at'] = datetime.now().timestamp()
                 redis_client.publish('auction_expired', json.dumps(test_data))
             elif notification_type == 'auction_won':
                 test_data['auction_id'] = 'test_id'
@@ -115,7 +115,7 @@ def create_app():
         For each expired auction, mark it as inactive, determine the winner (auction.event.user),
         and publish an event with the auction ID, expiration timestamp, and winner information.
         """
-        now = datetime.utcnow()
+        now = datetime.now()
         logging.info(f"Running auction expiration check at UTC: {now.isoformat()}")
 
         # Query auctions where is_active is True and auction_type is 'forward'
@@ -148,7 +148,7 @@ def create_app():
         Mark an auction as expired, determine the winner, and publish appropriate events.
         This is called either by the check_expired_auctions function or by individual auction timers.
         """
-        now = datetime.utcnow()
+        now = datetime.now()
         logging.info(f"[EXPIRATION] Timer fired for auction {auction.slug} at {now.isoformat()}")
 
         # Mark auction as expired if it's still active
@@ -219,14 +219,14 @@ def create_app():
         """
         if not auction.date_added:
             logging.warning(f"[SCHEDULING] Auction {auction.slug} has no date_added, setting it now")
-            auction.date_added = datetime.utcnow()
+            auction.date_added = datetime.now()
             auction.save()
 
         # Calculate the expiration time
         expiration_time = auction.date_added + timedelta(minutes=auction.duration)
 
         # Calculate seconds until expiration
-        now = datetime.utcnow()
+        now = datetime.now()
         seconds_until_expiration = max(0, (expiration_time - now).total_seconds())
 
         logging.info(f"[SCHEDULING] Auction {auction.slug} to expire in {seconds_until_expiration} seconds (at {expiration_time.isoformat()})")
@@ -389,12 +389,12 @@ def create_app():
                 schedule_auction_expiration(auction)
             else:
                 # Calculate when the job will run
-                now = datetime.utcnow()
+                now = datetime.now()
                 run_time = job.next_run_time
 
                 # Handle timezone awareness - convert run_time to naive datetime for comparison
                 if hasattr(run_time, 'tzinfo') and run_time.tzinfo is not None:
-                    # Convert to a naive datetime for comparison with utcnow
+                    # Convert to a naive datetime for comparison with now
                     run_time_naive = run_time.replace(tzinfo=None)
                     time_until_job = run_time_naive - now
                 else:
