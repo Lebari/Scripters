@@ -16,7 +16,7 @@ const Receipt = () => {
 
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/receipt`,
+          `${import.meta.env.VITE_API_URL}/payment/receipt`,
           {
             headers: {
               "Authorization": `Bearer ${token}`

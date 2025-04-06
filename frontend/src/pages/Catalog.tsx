@@ -103,8 +103,12 @@ const Catalog = () => {
                         <div className="flex justify-center items-center h-40">
                             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold"></div>
                         </div>
-                    ) : <Button onClick={() => {setOffset((offset + limit)); loadMore();}}>
-                    View {limit} More Results</Button>}
+                    ) : <>
+                    {catalog.length >= limit ?
+                        <Button onClick={() => {setOffset((offset + limit)); loadMore();}}>
+                    View More Results</Button>
+                        :<></>}
+                    </>}
                 </div>
         </div>
     )

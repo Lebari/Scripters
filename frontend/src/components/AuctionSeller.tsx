@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Auction as AuctionType } from "../models.ts";
 import Button from "./Button.tsx";
 import {useTokenContext} from "./TokenContext.tsx";
+import axios from "axios";
 
 interface CatalogItemProps {
     auction: AuctionType;
@@ -13,6 +14,7 @@ const Auction: React.FC<CatalogItemProps> = ({ auction, btnLabel }) => {
     const navigate = useNavigate();
     const isNavigating = useRef(false);
     const { user } = useTokenContext();
+    const [bids, setBids] = useState();
 
     const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number }>({
         days: 0,
@@ -68,7 +70,23 @@ const Auction: React.FC<CatalogItemProps> = ({ auction, btnLabel }) => {
         }
         return formattedDate;
     }
-
+    const getAuctionBids = () =>{
+        axios({
+            baseURL: import.meta.env.VITE_API_URL,
+            url: `/catalog/${encodeURIComponent(auction.slug)}/latest`,
+            method: "get",
+        }).then((result) => {
+            console.log(result);
+            setBids(result.data.bids);
+        }).catch((error) => {
+            if (error.response) {
+                console.log(error.response);
+                console.log(error.response.status);
+                console.log(error.response.headers);
+            }
+        });
+    }
+    useEffect(()=>{getAuctionBids();}, []);
 
     const detailClick = () => {
         if (isNavigating.current) return;
@@ -126,6 +144,17 @@ const Auction: React.FC<CatalogItemProps> = ({ auction, btnLabel }) => {
                         <span className="text-sm text-gray-400">Added:</span>
                         <span className="text-sm text-gray-300">{new Date(auction.date_added).toLocaleDateString()}</span>
                     </div>
+
+                    {/*<div className="flex justify-between">*/}
+                    {/*    <span className="text-sm text-gray-400">Last bidder:</span>*/}
+                        {/*<span className="text-sm text-gray-300">{latest?.user.username}</span>*/}
+                    {/*</div>*/}
+                    <ol>
+                        Bid History
+                    {bids?.map((bid) => (
+                        <li>{bid.price}</li>
+                    ))}
+                    </ol>
                 </div>
 
                 <Button

@@ -1,19 +1,20 @@
 import { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import axios from "axios";
 import "./bidding.css";
 import { useTokenContext } from "../components/TokenContext";
-import { useNotificationHelpers } from "../components/NotificationContext";
+// import { useNotificationHelpers } from "../components/NotificationContext";
 import { useSocket } from "../components/SocketContext";
+import Button from "../components/Button.tsx";
 
 function ForwardBidding() {
   const location = useLocation();
   const auction = location.state?.auction;
   const navigate = useNavigate();
   const { token, user } = useTokenContext();
-  const { notifyAuctionWon } = useNotificationHelpers();
+  // const { notifyAuctionWon } = useNotificationHelpers();
   const { socket } = useSocket();
-  
+
   const [bidPrice, setBidPrice] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -22,6 +23,10 @@ function ForwardBidding() {
   const [currentHighestBid, setCurrentHighestBid] = useState(
     auction?.currentBid || auction?.raw?.item?.price || 0
   );
+
+  const goToSearch = () => {
+   navigate(import.meta.env.VITE_APP_SEARCH_URL)
+  };
 
   // Fetch the current highest bid from the backend when component mounts
   useEffect(() => {
@@ -172,6 +177,13 @@ function ForwardBidding() {
     return (
       <div className="bidding-container">
         <p className="bidding-error">No auction selected.</p>
+        <Button
+            className="px-6 py-3"
+            buttonVariant="clicked"
+            onClick={goToSearch}
+        >
+          Select an auction
+        </Button>
       </div>
     );
   }

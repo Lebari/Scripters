@@ -9,12 +9,65 @@ const AuctionPage: React.FC = () => {
     const location = useLocation();
     const { name } = useParams<{ name: string }>();
     const [auction, setAuction] = useState<AuctionType | null>(location.state as AuctionType);
-    const [popupVisible, setPopupVisible] = useState(false); 
-    const [priceInput, setPriceInput] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    const handleBid = () => {
+    const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number }>({
+        days: 0,
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+    });
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (auction) {
+                const now = new Date();
+                const addedDate = new Date(auction.date_added);
+                // Add the duration in minutes to the past date
+                addedDate.setMinutes(addedDate.getMinutes() + auction.duration);
+                const difference = addedDate.getTime() - now.getTime();
+
+                if (isNaN(addedDate.getTime())) {
+                    console.log('Invalid date and time.');
+                    return "";
+                }
+
+                if (difference <= 0) {
+                    clearInterval(interval);
+                    setTimeLeft({days: 0, hours: 0, minutes: 0, seconds: 0});
+                } else {
+                    const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+                    setTimeLeft({days, hours, minutes, seconds});
+                }
+            }
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [new Date()]);
+
+    function getTimeLeft():string {
+        const days = timeLeft.days;
+        const hours = timeLeft.hours;
+        const minutes = timeLeft.minutes;
+        const seconds = timeLeft.seconds;
+
+        let formattedDate = `${days} days, ${hours} hrs, ${minutes} mins, ${seconds} secs`;
+        if (days == 0) {
+            formattedDate = `${hours} hrs, ${minutes} mins, ${seconds} secs`;
+            if (hours == 0) {
+                formattedDate = `${minutes} mins, ${seconds} secs`;
+                if (minutes == 0) formattedDate = `${seconds} secs`;
+            }
+        }
+        return formattedDate;
+    }
+
+    const goToBid = () => {
         if (!auction) {
             console.error("Auction is not loaded yet.");
             return;
@@ -27,26 +80,6 @@ const AuctionPage: React.FC = () => {
                 navigate(import.meta.env.VITE_APP_UC32DCHBIDDING_URL, { state: { auction: auction } });
             } else {
                 console.log("Unknown auction type:", auction.auction_type);
-            }
-        }
-    };
-
-    const handleDutchUpdate = () => {
-        if (!auction) {
-            console.error("Auction is not loaded yet.");
-            return;
-        }
-
-        if(name){
-            if(name){
-                if (auction.auction_type === "Forward") {
-                    navigate(import.meta.env.VITE_APP_UC31FWDBIDDING_URL, { state: { auction: auction } });
-                } else if (auction.auction_type === "Dutch") {
-                    // Pass the auction (which now includes the current bid, i.e. item.price) to DutchBidding
-                    navigate(import.meta.env.VITE_APP_UC32DCHBIDDING_URL, { state: { auction: auction } });
-                } else {
-                    console.log("Unknown auction type:", auction.auction_type);
-                }
             }
         }
     };
@@ -86,11 +119,6 @@ const AuctionPage: React.FC = () => {
         getAuction(); 
     }, [name, location.state]);
 
-    const updateForm = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const {value} = event.target
-        setPriceInput(Number.parseInt(value));
-        console.log(priceInput);
-    }
 
     if (loading) return (
         <div className="flex justify-center items-center h-64">
@@ -112,7 +140,6 @@ const AuctionPage: React.FC = () => {
                     {error}
                 </div>
             )}
-
             <div className="bg-black-800 border border-gray-800 rounded-lg overflow-hidden shadow-xl mb-8">
                 <div className="md:flex">
                     {/* Auction Details */}
@@ -143,8 +170,8 @@ const AuctionPage: React.FC = () => {
                                     <p className="font-medium text-gray-300">{auction.seller.username}</p>
                                 </div>
                                 <div>
-                                    <p className="text-sm text-gray-400">Duration</p>
-                                    <p className="font-medium text-gray-300">{auction.duration} hours</p>
+                                    <p className="text-sm text-gray-400">Time Left</p>
+                                    <p className="font-medium text-gray-300">{getTimeLeft()}</p>
                                 </div>
                                 <div>
                                     <p className="text-sm text-gray-400">Added</p>
@@ -161,72 +188,26 @@ const AuctionPage: React.FC = () => {
                         <div className="relative">
                             {auction.auction_type === "Dutch" ? (
                                 <div className="space-y-4">
-                                    <label className="block text-sm font-medium text-gold-light">
-                                        Set New Price
-                                    </label>
                                     <div className="flex items-center gap-4">
-                                        <div className="relative rounded-md shadow-sm flex-1">
-                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <span className="text-gray-400 sm:text-sm">$</span>
-                                            </div>
-                                            <input
-                                                type="number"
-                                                name="price"
-                                                value={priceInput}
-                                                onChange={updateForm}
-                                                className="bg-black-900 border border-gray-700 focus:ring-gold focus:border-gold block w-full pl-7 pr-12 py-3 sm:text-sm rounded-md"
-                                                placeholder="0.00"
-                                                maxLength={6}
-                                            />
-                                        </div>
                                         <Button 
-                                            onClick={handleDutchUpdate}
+                                            onClick={goToBid}
                                             className="px-6 py-3"
                                             buttonVariant="clicked"
                                         >
-                                            Update Price
+                                            Buy Now
                                         </Button>
                                     </div>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
-                                    <label className="block text-sm font-medium text-gold-light">
-                                        Place Your Bid
-                                    </label>
                                     <div className="flex items-center gap-4">
-                                        <div className="relative rounded-md shadow-sm flex-1">
-                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <span className="text-gray-400 sm:text-sm">$</span>
-                                            </div>
-                                            <input
-                                                type="number"
-                                                name="price"
-                                                value={priceInput}
-                                                onChange={updateForm}
-                                                className="bg-black-900 border border-gray-700 focus:ring-gold focus:border-gold block w-full pl-7 pr-12 py-3 sm:text-sm rounded-md"
-                                                placeholder="0.00"
-                                                maxLength={6}
-                                            />
-                                        </div>
                                         <Button 
-                                            onClick={handleBid}
+                                            onClick={goToBid}
                                             className="px-6 py-3"
                                             buttonVariant="clicked"
                                         >
-                                            Place Bid
+                                            Bid on this Auction
                                         </Button>
-                                    </div>
-                                </div>
-                            )}
-                            
-                            {/* Success Popup */}
-                            {popupVisible && (
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="bg-white text-green-dark px-6 py-4 rounded-md shadow-[0_0_20px_rgba(34,111,84,0.4)] border border-green">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 inline-block mr-2 text-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        <span className="font-bold text-black-700">Success!</span>
                                     </div>
                                 </div>
                             )}

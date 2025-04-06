@@ -98,11 +98,17 @@ class User(UserMixin, Document):
         model_json = self.to_mongo().to_dict()
 
         model_json["broker"] = self.broker.get_id() if self.broker else None
+        print("i")
         model_json["cards"] = [card.get_id() for card in self.cards if card]
+        print("il")
         model_json["sales"] = [sale.get_id() for sale in self.sales if sale]
+        print("ip")
         model_json["purchases"] = [purchase.get_id() for purchase in self.purchases if purchase]
+        print("io")
         model_json["subscriptions"] = [sub.get_id() for sub in self.subscriptions if sub]
+        print("il")
         model_json["auctions"] = [auction.get_id() for auction in self.auctions if auction]
+        print("k")
         model_json["id"] = str(model_json["_id"])
         del model_json["_id"]
         return model_json

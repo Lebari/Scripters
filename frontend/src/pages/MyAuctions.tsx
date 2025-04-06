@@ -1,9 +1,9 @@
 // Show logged-in user's available dutch auctions and redirect them to catalog page to update
 
 import {Auction as AuctionType} from "../models.ts";
-import Auction from "../components/Auction.tsx";
 import {useEffect, useState} from "react";
 import axios from "axios";
+import AuctionSeller from "../components/AuctionSeller.tsx";
 
 export const MyAuctions = () =>{
     const [catalog, setCatalogsList] = useState([]);
@@ -51,7 +51,8 @@ export const MyAuctions = () =>{
                     {/* Auctions grid */}
                         <div className="grid gap-4 grid-cols-3">
                             {catalog.map((auction: AuctionType) => (
-                                <Auction key={auction.id} auction={auction} btnLabel={"Edit Auction"}/>
+                                <AuctionSeller key={auction.id} auction={auction} btnLabel={"Edit Auction"}/>
+                                // <Auction key={auction.id} auction={auction} btnLabel={"Edit Auction"}/>
                             ))}
                         </div>
                     </div>

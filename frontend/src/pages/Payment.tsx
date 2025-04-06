@@ -39,25 +39,25 @@ const Payment = () => {
       const token = localStorage.getItem("token");
 
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/payment`,
-        {
-          ...paymentData,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+          `http://localhost:5001/payment/`,
+          {
+            ...paymentData,
           },
-        }
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
       );
 
       const purchaseId = response.data.payment.payment_id;
 
-      navigate('/receipt', {
+      navigate(`${import.meta.env.VITE_APP_UC6RECEIPT_URL}`, {
         state: { purchaseId }
       });
-      
-      
+
+
     } catch (err: any) {
       console.error("Payment error:", err);
       setError(err.response?.data?.error || "Payment failed. Please try again.");
@@ -67,33 +67,33 @@ const Payment = () => {
   };
 
   return (
-    <div className="payment-container">
-      <h2>Payment for {auction.name}</h2>
-      <p><strong>Buyer:</strong> {user.username}</p>
-      <p><strong>Item Price:</strong> ${finalPrice.toFixed(2)}</p>
-      <p><strong>Shipping:</strong> ${shippingPrice.toFixed(2)} ({expeditedShipping ? "Expedited" : "Standard"})</p>
-      <p><strong>Total Amount Due:</strong> ${totalPrice.toFixed(2)}</p>
+      <div className="payment-container">
+        <h2>Payment for {auction.name}</h2>
+        <p><strong>Buyer:</strong> {user.username}</p>
+        <p><strong>Item Price:</strong> ${finalPrice.toFixed(2)}</p>
+        <p><strong>Shipping:</strong> ${shippingPrice.toFixed(2)} ({expeditedShipping ? "Expedited" : "Standard"})</p>
+        <p><strong>Total Amount Due:</strong> ${totalPrice.toFixed(2)}</p>
 
-      <form onSubmit={handlePaymentSubmit}>
-        <label>Card Number:</label>
-        <input type="text" name="card_number" onChange={handleChange} required  maxLength={16}/>
+        <form onSubmit={handlePaymentSubmit}>
+          <label>Card Number:</label>
+          <input type="text" name="card_number" onChange={handleChange} required  maxLength={16}/>
 
-        <label>Card Holder Name:</label>
-        <input type="text" name="card_name" onChange={handleChange} required maxLength={50} />
+          <label>Card Holder Name:</label>
+          <input type="text" name="card_name" onChange={handleChange} required maxLength={50} />
 
-        <label>Expiration Date MMYY:</label>
-        <input type="text" name="exp_date" onChange={handleChange} required  maxLength={4}/>
+          <label>Expiration Date MMYY:</label>
+          <input type="text" name="exp_date" onChange={handleChange} required  maxLength={4}/>
 
-        <label>Security Code XXX:</label>
-        <input type="password" name="security_code" onChange={handleChange} required  maxLength={3}/>
+          <label>Security Code XXX:</label>
+          <input type="password" name="security_code" onChange={handleChange} required  maxLength={3}/>
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Processing..." : "Submit Payment"}
-        </button>
-      </form>
+          <button type="submit" disabled={loading}>
+            {loading ? "Processing..." : "Submit Payment"}
+          </button>
+        </form>
 
-      {error && <p className="payment-error">{error}</p>}
-    </div>
+        {error && <p className="payment-error">{error}</p>}
+      </div>
   );
 };
 

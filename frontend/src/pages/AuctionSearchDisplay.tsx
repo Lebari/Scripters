@@ -51,22 +51,26 @@ function AuctionSearchDisplay() {
       raw // keep the original data if you need it
     };
   }
+  // Filter on auctionType client-side
+  const applyTypeFilter = (list: Auction[]) => {
+    if (auctionType === "All") return list;
+    return list.filter((a) => a.auctionType === auctionType);
+  };
 
-  // 2. Fetch all auctions on mount
-  useEffect(() => {
+  function getAllAuctions() {
     setLoading(true);
     axios({
       baseURL: import.meta.env.VITE_API_URL,
-      url: "/search",
-      method: "post",
-      params:{
+      url: "/catalog/",
+      method: "get",
+      params: {
         active: 1
       }
     }).then((result) => {
       console.log(result);
       const activeAuctions = result.data.auctions;
       const normalized = activeAuctions.map((rawAuc: RawAuction) => normalizeAuction(rawAuc));
-      setDisplayedAuctions(normalized);
+      setDisplayedAuctions(applyTypeFilter(normalized));
       setLoading(false);
     }).catch((error) => {
       console.error("Error searching auctions:", error);
@@ -77,6 +81,11 @@ function AuctionSearchDisplay() {
       }
       setLoading(false);
     });
+  }
+
+// 2. Fetch all auctions on mount
+  useEffect(() => {
+    getAllAuctions();
   }, []);
 
   // 3. Searching (GET if keyword empty, else POST), then normalize
@@ -85,14 +94,7 @@ function AuctionSearchDisplay() {
     setLoading(true);
     setSelectedAuctionId(null); // Reset selection when searching
 
-    // Filter on auctionType client-side
-    const applyTypeFilter = (list: Auction[]) => {
-      if (auctionType === "All") return list;
-      return list.filter((a) => a.auctionType === auctionType);
-    };
-
     if (keyword.trim() !== "") {
-      // get only active auctions
       axios({
         baseURL: import.meta.env.VITE_API_URL,
         url: "/search/",
@@ -116,7 +118,10 @@ function AuctionSearchDisplay() {
         }
         setLoading(false);
       });
-  };
+  }else{
+      // get all active auctions
+      getAllAuctions();
+    }
   }
 
   // 4. Single Bid button
@@ -129,6 +134,7 @@ function AuctionSearchDisplay() {
     } else if (selectedAuction.auctionType === "Dutch") {
       // Pass the auction (which now includes the current bid, i.e. item.price) to DutchBidding
       navigate(import.meta.env.VITE_APP_UC32DCHBIDDING_URL, { state: { auction: selectedAuction } });
+      console.log("hekrhasehfshf")
     } else {
       console.log("Unknown auction type:", selectedAuction.auctionType);
     }
@@ -197,7 +203,7 @@ function AuctionSearchDisplay() {
                     onClick={() => setSelectedAuctionId(auction.id)}
                   >
                     <td>{auction.name}</td>
-                    <td>${auction.currentBid.toFixed(2)}</td>
+                    <td>${auction.currentBid}</td>
                     <td>{auction.auctionType}</td>
                     <td>
                       <input

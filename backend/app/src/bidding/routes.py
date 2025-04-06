@@ -19,7 +19,7 @@ def get_highest_bid(slug):
     try:
         # get auction's event for latest bid
         print("latest_bid")
-        latest_bid = auction.event.price
+        latest_bid = auction.event.price if auction.event.price > auction.item.price else auction.item.price
         return jsonify({"price": latest_bid}), 201
     except:
 
@@ -51,8 +51,12 @@ def bid_forward(slug):
         return jsonify({"error": "Bid price must be a valid number."}), 400
 
     print(auction.event)
-    if(not auction.event is None and bid_price <= auction.event.price):
+    if auction.event is not None and bid_price <= auction.event.price:
         return jsonify({"error": "New bid must be higher than the old bid."}), 400
+
+    # update item price
+    auction.item.price = bid_price
+    auction.item.save()
 
     # Mark the auction as inactive and update the timestamp
     auction.date_updated = datetime.now()
