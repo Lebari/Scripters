@@ -2,7 +2,7 @@ from . import catalog
 import logging
 import json
 from ..validations import validate_new_auction, seller_required, validate_update_auction
-from ...models import Auction, Item, AuctionType
+from ...models import Auction, Item, AuctionType, User
 from flask import jsonify, request, current_app
 from mongoengine import Q
 from datetime import datetime
@@ -45,6 +45,24 @@ def get_auction(slug):
         return jsonify({"error": "Auction not found"}), 404
 
     return jsonify({"auction": auction.to_json()}), 200
+
+
+@catalog.route("/<slug>/latest", methods=["GET"])
+def get_auction_latest(slug):
+    print("Hello from get_auction_latest!")
+    # return latest bid of auction with specified slug
+    auction = Auction.objects(slug=slug).first()
+
+    if auction is None:
+        return jsonify({"error": "Auction not found"}), 404
+
+    # get all bids
+    allbids = [bid.to_json() for bid in auction.bids if bid]
+    # get latest bidder
+    event_json = auction.event.to_json() if auction.event else None
+    latest_user = User.objects(id=event_json.get("user"))
+
+    return jsonify({"bids": allbids}), 200
 
 
 @catalog.route("/upload", methods=["POST"])
